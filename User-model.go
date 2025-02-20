@@ -11,9 +11,10 @@ type UserAuth struct {
 }
 
 type User struct {
-	ID int `gorm:"primaryKey"`
-	// UserAuthID int `gorm:"FK"`
-	Name    string
-	Surname string
-	Role    string
+	gorm.Model
+	Name       string
+	Surname    string
+	Role       string
+	UserAuthID uint //meaning fk
+	UserAuth   UserAuth
 }

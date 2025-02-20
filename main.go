@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/golang-jwt/jwt/v5"
+
 	//"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
@@ -21,6 +23,7 @@ const (
 	password = "mypassword"
 	database = "mydatabase"
 )
+const jwtSecretKey = "TestJwtSecretKey" //Should be env
 
 func main() {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -44,8 +47,12 @@ func main() {
 	}
 
 	fmt.Printf("Connect successful.")
-	fmt.Print(db)
+	// fmt.Print(db)
+	db.AutoMigrate(User{}, UserAuth{})
+
 	app := fiber.New()
+
+	// app.Post("/register", )
 
 	app.Get("/login", func(c fiber.Ctx) error {
 		var user UserAuth
@@ -53,14 +60,15 @@ func main() {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 
-		// userAuth, err := searchUserAuth(db, &user)
-		// if err != nil {
-		// 	return c.Status(fiber.StatusInternalServerError).SendString("authentication fail.")
-		// }
+		token, err := login(db, &user)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return c.SendStatus(fiber.StatusUnauthorized)
+		}
 
 		return c.JSON(fiber.Map{
 			"message": "login succesful.",
-			"token":   "",
+			"token":   token,
 		})
 
 	})
@@ -73,19 +81,25 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 		return "", result.Error
 	}
 	hashedpassword := selectedUser.Password
-	err := bcrypt.CompareHashAndPassword(
+	if err := bcrypt.CompareHashAndPassword(
 		[]byte(hashedpassword),
 		[]byte(user.Password),
-	)
+	); err != nil {
+		return "", err
+	}
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email":      user.Email,
+		"expireData": time.Now().Add(time.Hour * 1).Unix(),
+	})
+	t, err := token.SignedString(jwtSecretKey)
 	if err != nil {
 		return "", err
 	}
 
-	// var jwtSecretKey = "TestJwtSecretKey" //Should be env
-	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-
-	// })
-	// claims := token.claims.(jwt.MapClaims)
-	return "", nil
+	return t, nil
 
 }
