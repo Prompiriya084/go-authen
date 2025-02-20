@@ -52,17 +52,40 @@ func main() {
 
 	app := fiber.New()
 
-	// app.Post("/register", )
+	app.Post("/register", func(c fiber.Ctx) error {
+		var user User
+		if err := c.Bind().JSON(user); err != nil {
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+
+		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(user.UserAuth.Password), bcrypt.DefaultCost)
+		if err != nil {
+			fmt.Println(err.Error())
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+		user.UserAuth.Password = string(hashedpassword)
+
+		if err := createUser(db, &user); err != nil {
+			fmt.Println(err.Error())
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+
+		return c.JSON(fiber.Map{
+			"message": "register successful.",
+		})
+	})
 
 	app.Get("/login", func(c fiber.Ctx) error {
 		var user UserAuth
-		if err := c.Bind().JSON(&user); err != nil {
+		if err := c.Bind().JSON(user); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 
 		token, err := login(db, &user)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Println(err.Error())
 			return c.SendStatus(fiber.StatusUnauthorized)
 		}
 
@@ -72,12 +95,14 @@ func main() {
 		})
 
 	})
+
+	app.Listen(":8080")
 }
 func login(db *gorm.DB, user *UserAuth) (string, error) {
 	var selectedUser UserAuth
 	result := db.Where("Email=?", user.Email).First(selectedUser)
 	if result.Error != nil {
-		fmt.Printf(result.Error.Error())
+		fmt.Println(result.Error.Error())
 		return "", result.Error
 	}
 	hashedpassword := selectedUser.Password
@@ -87,9 +112,6 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 	); err != nil {
 		return "", err
 	}
-	// if err != nil {
-	// 	return "", err
-	// }
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":      user.Email,
@@ -101,5 +123,30 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 	}
 
 	return t, nil
+}
 
+func createUser(db *gorm.DB, user *User) error {
+	result := db.Create(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func getUsers(db *gorm.DB) []User {
+	var user []User
+	result := db.Find(&user)
+	if result.Error != nil {
+		fmt.Println("Error get books: %v", result.Error)
+	}
+	return user
+}
+func getUser(db *gorm.DB, id int) (*User, error) {
+	var user User
+	result := db.First(&user, id)
+	if result.Error != nil {
+		//log.Fatalf("Error get book: %v", result.Error)
+		return nil, result.Error
+	}
+
+	return &user, nil
 }
