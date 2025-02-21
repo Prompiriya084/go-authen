@@ -23,7 +23,8 @@ const (
 	password = "mypassword"
 	database = "mydatabase"
 )
-const jwtSecretKey = "TestJwtSecretKey" //Should be env
+
+var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
 
 func main() {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -54,10 +55,12 @@ func main() {
 
 	app.Post("/register", func(c fiber.Ctx) error {
 		var user User
-		if err := c.Bind().JSON(user); err != nil {
+		if err := c.Bind().JSON(&user); err != nil {
+			fmt.Print(err.Error())
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-
+		//user.Role = "admin"
+		user.Role = "user"
 		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(user.UserAuth.Password), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -77,9 +80,9 @@ func main() {
 		})
 	})
 
-	app.Get("/login", func(c fiber.Ctx) error {
+	app.Post("/login", func(c fiber.Ctx) error {
 		var user UserAuth
-		if err := c.Bind().JSON(user); err != nil {
+		if err := c.Bind().JSON(&user); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 
@@ -100,16 +103,19 @@ func main() {
 }
 func login(db *gorm.DB, user *UserAuth) (string, error) {
 	var selectedUser UserAuth
-	result := db.Where("Email=?", user.Email).First(selectedUser)
+	result := db.Where("email=?", user.Email).First(&selectedUser)
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
 		return "", result.Error
 	}
 	hashedpassword := selectedUser.Password
+	fmt.Println(hashedpassword)
+	fmt.Println(user.Password)
 	if err := bcrypt.CompareHashAndPassword(
 		[]byte(hashedpassword),
 		[]byte(user.Password),
 	); err != nil {
+		fmt.Print(err.Error())
 		return "", err
 	}
 
@@ -126,7 +132,7 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 }
 
 func createUser(db *gorm.DB, user *User) error {
-	result := db.Create(user)
+	result := db.Create(&user)
 	if result.Error != nil {
 		return result.Error
 	}

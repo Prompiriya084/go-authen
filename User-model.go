@@ -4,6 +4,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// type RequestRegister struct {
+// 	UserID          uint
+// 	User            User
+// 	UserAuthID      uint
+// 	UserAuth        UserAuth
+// 	ConfirmPassword string `json:"confirm_password"`
+// }
+
 type UserAuth struct {
 	gorm.Model
 	Email    string `json:"email" gorm:"unique"`
@@ -12,9 +20,9 @@ type UserAuth struct {
 
 type User struct {
 	gorm.Model
-	Name       string
-	Surname    string
-	Role       string
-	UserAuthID uint //meaning fk
-	UserAuth   UserAuth
+	Name       string   `json:"name"`
+	Surname    string   `json:"surname"`
+	Role       string   `json:"role"`
+	UserAuthID uint     `json:"userauth_id"` //meaning fk
+	UserAuth   UserAuth `json:"userauth"`
 }
