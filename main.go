@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -24,7 +25,29 @@ const (
 	database = "mydatabase"
 )
 
-var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
+//var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
+
+func authrequired(c fiber.Ctx) error {
+	authHeader := c.Get("Authorization") // Get Authorization header
+	if authHeader == "" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+	// Ensure it starts with "Bearer "
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader { // Token not prefixed with "Bearer "
+		return c.SendStatus(fiber.StatusUnauthorized) //.JSON(fiber.Map{"error": "Invalid token format"})
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("Jwt_Secret")), nil
+	})
+	if err != nil || !token.Valid {
+		fmt.Print(err.Error())
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	return c.Next()
+}
 
 func main() {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -54,14 +77,18 @@ func main() {
 	app := fiber.New()
 
 	app.Post("/register", func(c fiber.Ctx) error {
-		var user User
-		if err := c.Bind().JSON(&user); err != nil {
+		var reqRegister RequestRegister
+		if err := c.Bind().JSON(&reqRegister); err != nil {
 			fmt.Print(err.Error())
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		//user.Role = "admin"
-		user.Role = "user"
-		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(user.UserAuth.Password), bcrypt.DefaultCost)
+		fmt.Println(reqRegister)
+		var user User
+		user = reqRegister.User
+		user.Role = "admin"
+		//user.Role = "user"
+		//fmt.Println(user)
+		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(reqRegister.User.UserAuth.Password), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println(err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -72,7 +99,7 @@ func main() {
 
 		if err := createUser(db, &user); err != nil {
 			fmt.Println(err.Error())
-			return c.SendStatus(fiber.StatusBadRequest)
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		return c.JSON(fiber.Map{
@@ -81,12 +108,12 @@ func main() {
 	})
 
 	app.Post("/login", func(c fiber.Ctx) error {
-		var user UserAuth
-		if err := c.Bind().JSON(&user); err != nil {
+		var userAuth UserAuth
+		if err := c.Bind().JSON(&userAuth); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-
-		token, err := login(db, &user)
+		fmt.Println(userAuth)
+		token, err := login(db, &userAuth)
 		if err != nil {
 			fmt.Println(err.Error())
 			return c.SendStatus(fiber.StatusUnauthorized)
@@ -98,7 +125,10 @@ func main() {
 		})
 
 	})
-
+	app.Use("/users", authrequired)
+	app.Get("/users", func(c fiber.Ctx) error {
+		return c.JSON(getUsers(db))
+	})
 	app.Listen(":8080")
 }
 func login(db *gorm.DB, user *UserAuth) (string, error) {
@@ -123,7 +153,7 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 		"email":      user.Email,
 		"expireData": time.Now().Add(time.Hour * 1).Unix(),
 	})
-	t, err := token.SignedString(jwtSecretKey)
+	t, err := token.SignedString([]byte(os.Getenv("Jwt_Secret")))
 	if err != nil {
 		return "", err
 	}
@@ -142,7 +172,7 @@ func getUsers(db *gorm.DB) []User {
 	var user []User
 	result := db.Find(&user)
 	if result.Error != nil {
-		fmt.Println("Error get books: %v", result.Error)
+		fmt.Printf("Error get books: %v", result.Error)
 	}
 	return user
 }
