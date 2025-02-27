@@ -10,11 +10,12 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 
-	//"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -25,7 +26,8 @@ const (
 	database = "mydatabase"
 )
 
-//var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
+// var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
+var validate = validator.New()
 
 func authrequired(c fiber.Ctx) error {
 	authHeader := c.Get("Authorization") // Get Authorization header
@@ -82,7 +84,10 @@ func main() {
 			fmt.Print(err.Error())
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		fmt.Println(reqRegister)
+		if err := validate.Struct(reqRegister); err != nil {
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+
 		var user User
 		user = reqRegister.User
 		user.Role = "admin"
