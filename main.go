@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
+	//"String"
+	entities "github.com/Prompiriya084/go-authen/Entities"
 	"github.com/gofiber/fiber/v3"
+
+	//jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v5"
 
 	"golang.org/x/crypto/bcrypt"
@@ -30,23 +33,55 @@ const (
 var validate = validator.New()
 
 func authrequired(c fiber.Ctx) error {
-	authHeader := c.Get("Authorization") // Get Authorization header
-	if authHeader == "" {
-		return c.SendStatus(fiber.StatusUnauthorized)
-	}
-	// Ensure it starts with "Bearer "
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	if tokenString == authHeader { // Token not prefixed with "Bearer "
-		return c.SendStatus(fiber.StatusUnauthorized) //.JSON(fiber.Map{"error": "Invalid token format"})
+	// authHeader := c.Get("Authorization") // Get Authorization header
+	// if authHeader == "" {
+	// 	return c.SendStatus(fiber.StatusUnauthorized)
+	// }
+	// // Ensure it starts with "Bearer "
+	// tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	// if tokenString == authHeader { // Token not prefixed with "Bearer "
+	// 	return c.SendStatus(fiber.StatusUnauthorized) //.JSON(fiber.Map{"error": "Invalid token format"})
+	// }
+
+	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// 	return []byte(os.Getenv("Jwt_Secret")), nil
+	// })
+	// if err != nil || !token.Valid {
+	// 	fmt.Print(err.Error())
+	// 	return c.SendStatus(fiber.StatusUnauthorized)
+	// }
+	tokenString := c.Get("Authorization") // Get token from header
+	if tokenString == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
 	}
 
-	token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// Remove "Bearer " prefix if present
+	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
+		tokenString = tokenString[7:]
+	}
+
+	// Parse Token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(os.Getenv("Jwt_Secret")), nil
 	})
 	if err != nil || !token.Valid {
-		fmt.Print(err.Error())
-		return c.SendStatus(fiber.StatusUnauthorized)
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 	}
+	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// 	return []byte(os.Getenv("Jwt_Secret")), nil
+	// })
+	// if err != nil || !token.Valid {
+	// 	fmt.Print(err.Error())
+	// 	return c.SendStatus(fiber.StatusUnauthorized)
+	// }
+
+	// jwtware.New(jwtware.Config{
+	// 	SigningKey: []byte(os.Getenv("Jwt_Secret")),
+	// 	// ErrorHandler: ,
+	// })
 
 	return c.Next()
 }
@@ -74,25 +109,31 @@ func main() {
 
 	fmt.Printf("Connect successful.")
 	// fmt.Print(db)
-	db.AutoMigrate(User{}, UserAuth{})
+	db.AutoMigrate(entities.User{}, entities.UserAuth{})
 
 	app := fiber.New()
 
 	app.Post("/register", func(c fiber.Ctx) error {
-		var reqRegister RequestRegister
+		var reqRegister entities.RequestRegister
 		if err := c.Bind().JSON(&reqRegister); err != nil {
 			fmt.Print(err.Error())
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
+		//fmt.Println(reqRegister)
 		if err := validate.Struct(reqRegister); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 
-		var user User
+		var user entities.User
 		user = reqRegister.User
-		user.Role = "admin"
+		fmt.Println(user)
+		if user, _ := getUserWithUserAuthByEmail(db, user.UserAuth.Email); user != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Data duplicated.",
+			})
+		}
+		user.Role = "user"
 		//user.Role = "user"
-		//fmt.Println(user)
 		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(reqRegister.User.UserAuth.Password), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -113,7 +154,7 @@ func main() {
 	})
 
 	app.Post("/login", func(c fiber.Ctx) error {
-		var userAuth UserAuth
+		var userAuth entities.UserAuth
 		if err := c.Bind().JSON(&userAuth); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
@@ -130,14 +171,16 @@ func main() {
 		})
 
 	})
-	app.Use("/users", authrequired)
+	// JWT Middleware
+	app.Use(authrequired)
+	//app.Use("/users", authrequired)
 	app.Get("/users", func(c fiber.Ctx) error {
 		return c.JSON(getUsers(db))
 	})
 	app.Listen(":8080")
 }
-func login(db *gorm.DB, user *UserAuth) (string, error) {
-	var selectedUser UserAuth
+func login(db *gorm.DB, user *entities.UserAuth) (string, error) {
+	var selectedUser entities.UserAuth
 	result := db.Where("email=?", user.Email).First(&selectedUser)
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
@@ -166,28 +209,51 @@ func login(db *gorm.DB, user *UserAuth) (string, error) {
 	return t, nil
 }
 
-func createUser(db *gorm.DB, user *User) error {
+func createUser(db *gorm.DB, user *entities.User) error {
 	result := db.Create(&user)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
-func getUsers(db *gorm.DB) []User {
-	var user []User
+func getUsers(db *gorm.DB) []entities.User {
+	var user []entities.User
 	result := db.Find(&user)
 	if result.Error != nil {
 		fmt.Printf("Error get books: %v", result.Error)
 	}
 	return user
 }
-func getUser(db *gorm.DB, id int) (*User, error) {
-	var user User
+func getUser(db *gorm.DB, id int) (*entities.User, error) {
+	var user entities.User
 	result := db.First(&user, id)
 	if result.Error != nil {
 		//log.Fatalf("Error get book: %v", result.Error)
 		return nil, result.Error
 	}
+
+	return &user, nil
+}
+func getUserWithUserAuthByEmail(db *gorm.DB, email string) (*entities.User, error) {
+	fmt.Println(email)
+	// var userAuth entities.UserAuth
+	// if err := db.Where("email = ?", email).First(&userAuth).Error; err != nil {
+	// 	fmt.Println("UserAuth not found")
+	// 	return nil, err
+	// }
+
+	// var user entities.User
+	// if err := db.Where("user_auth_id = ?", userAuth.ID).Preload("UserAuth").First(&user).Error; err != nil {
+	// 	fmt.Println("User not found")
+	// 	return nil, err
+	// }
+	var user entities.User
+	result := db.Preload("UserAuth").Where("user_auths.email = ?", email).Joins("JOIN user_auths ON user_auths.id = users.user_auth_id").First(&user)
+	if result.Error != nil {
+		//log.Fatalf("Error get book: %v", result.Error)
+		return nil, result.Error
+	}
+	fmt.Println(user)
 
 	return &user, nil
 }
