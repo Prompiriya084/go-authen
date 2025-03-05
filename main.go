@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	//"String"
@@ -19,17 +21,9 @@ import (
 	"gorm.io/gorm/logger"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	username = "myuser"
-	password = "mypassword"
-	database = "mydatabase"
-)
-
-// var jwtSecretKey = []byte("TestJwtSecretKey") //Should be env
 var validate = validator.New()
 
 func authrequired(c fiber.Ctx) error {
@@ -51,6 +45,10 @@ func authrequired(c fiber.Ctx) error {
 	// 	return c.SendStatus(fiber.StatusUnauthorized)
 	// }
 	tokenString := c.Get("Authorization") // Get token from header
+	if bearerString := strings.Split(tokenString, " "); bearerString[0] != "Bearer" {
+		fmt.Println(bearerString[0])
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token format"})
+	}
 	if tokenString == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
 	}
@@ -67,29 +65,29 @@ func authrequired(c fiber.Ctx) error {
 		}
 		return []byte(os.Getenv("Jwt_Secret")), nil
 	})
+
 	if err != nil || !token.Valid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 	}
-	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-	// 	return []byte(os.Getenv("Jwt_Secret")), nil
-	// })
-	// if err != nil || !token.Valid {
-	// 	fmt.Print(err.Error())
-	// 	return c.SendStatus(fiber.StatusUnauthorized)
-	// }
-
-	// jwtware.New(jwtware.Config{
-	// 	SigningKey: []byte(os.Getenv("Jwt_Secret")),
-	// 	// ErrorHandler: ,
-	// })
-
 	return c.Next()
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Warning: No .env file found")
+	}
+
+	host := os.Getenv("DB_Host")
+	port, _ := strconv.Atoi(os.Getenv("DB_Port"))
+	username := os.Getenv("DB_Username")
+	password := os.Getenv("DB_Password")
+	database := os.Getenv("DB_Name")
+
 	dsn := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, username, password, database)
+	fmt.Println(dsn)
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
