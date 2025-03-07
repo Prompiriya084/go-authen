@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
-	//"String"
-	entities "github.com/Prompiriya084/go-authen/Entities"
+	entities "github.com/Prompiriya084/go-authen/Internal/core/entities"
+	web "github.com/Prompiriya084/go-authen/Web/Routes"
+	middleware "github.com/Prompiriya084/go-authen/internal/adapters/middleware"
 	"github.com/gofiber/fiber/v3"
 
 	//jwtware "github.com/gofiber/jwt/v3"
@@ -25,52 +25,6 @@ import (
 )
 
 var validate = validator.New()
-
-func authrequired(c fiber.Ctx) error {
-	// authHeader := c.Get("Authorization") // Get Authorization header
-	// if authHeader == "" {
-	// 	return c.SendStatus(fiber.StatusUnauthorized)
-	// }
-	// // Ensure it starts with "Bearer "
-	// tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	// if tokenString == authHeader { // Token not prefixed with "Bearer "
-	// 	return c.SendStatus(fiber.StatusUnauthorized) //.JSON(fiber.Map{"error": "Invalid token format"})
-	// }
-
-	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-	// 	return []byte(os.Getenv("Jwt_Secret")), nil
-	// })
-	// if err != nil || !token.Valid {
-	// 	fmt.Print(err.Error())
-	// 	return c.SendStatus(fiber.StatusUnauthorized)
-	// }
-	tokenString := c.Get("Authorization") // Get token from header
-	if bearerString := strings.Split(tokenString, " "); bearerString[0] != "Bearer" {
-		fmt.Println(bearerString[0])
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token format"})
-	}
-	if tokenString == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
-	}
-
-	// Remove "Bearer " prefix if present
-	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-		tokenString = tokenString[7:]
-	}
-
-	// Parse Token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("Jwt_Secret")), nil
-	})
-
-	if err != nil || !token.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
-	}
-	return c.Next()
-}
 
 func main() {
 	err := godotenv.Load()
@@ -111,70 +65,71 @@ func main() {
 
 	app := fiber.New()
 
-	app.Post("/register", func(c fiber.Ctx) error {
-		var reqRegister entities.RequestRegister
-		if err := c.Bind().JSON(&reqRegister); err != nil {
-			fmt.Print(err.Error())
-			return c.SendStatus(fiber.StatusBadRequest)
-		}
-		//fmt.Println(reqRegister)
-		if err := validate.Struct(reqRegister); err != nil {
-			return c.SendStatus(fiber.StatusBadRequest)
-		}
+	// app.Post("/register", func(c fiber.Ctx) error {
+	// 	var reqRegister entities
+	// 	if err := c.Bind().JSON(&reqRegister); err != nil {
+	// 		fmt.Print(err.Error())
+	// 		return c.SendStatus(fiber.StatusBadRequest)
+	// 	}
+	// 	//fmt.Println(reqRegister)
+	// 	if err := validate.Struct(reqRegister); err != nil {
+	// 		return c.SendStatus(fiber.StatusBadRequest)
+	// 	}
 
-		var user entities.User
-		user = reqRegister.User
-		fmt.Println(user)
-		if user, _ := getUserWithUserAuthByEmail(db, user.UserAuth.Email); user != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Data duplicated.",
-			})
-		}
-		user.Role = "user"
-		//user.Role = "user"
-		hashedpassword, err := bcrypt.GenerateFromPassword([]byte(reqRegister.User.UserAuth.Password), bcrypt.DefaultCost)
-		if err != nil {
-			fmt.Println(err.Error())
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-		user.UserAuth.Password = string(hashedpassword)
+	// 	var user entities.User
+	// 	user = reqRegister.User
+	// 	fmt.Println(user)
+	// 	if user, _ := getUserWithUserAuthByEmail(db, user.UserAuth.Email); user != nil {
+	// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 			"message": "Data duplicated.",
+	// 		})
+	// 	}
+	// 	user.Role = "user"
+	// 	//user.Role = "user"
+	// 	hashedpassword, err := bcrypt.GenerateFromPassword([]byte(reqRegister.User.UserAuth.Password), bcrypt.DefaultCost)
+	// 	if err != nil {
+	// 		fmt.Println(err.Error())
+	// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 			"message": err.Error(),
+	// 		})
+	// 	}
+	// 	user.UserAuth.Password = string(hashedpassword)
 
-		if err := createUser(db, &user); err != nil {
-			fmt.Println(err.Error())
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
+	// 	if err := createUser(db, &user); err != nil {
+	// 		fmt.Println(err.Error())
+	// 		return c.SendStatus(fiber.StatusInternalServerError)
+	// 	}
 
-		return c.JSON(fiber.Map{
-			"message": "register successful.",
-		})
-	})
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "register successful.",
+	// 	})
+	// })
 
-	app.Post("/login", func(c fiber.Ctx) error {
-		var userAuth entities.UserAuth
-		if err := c.Bind().JSON(&userAuth); err != nil {
-			return c.SendStatus(fiber.StatusBadRequest)
-		}
-		fmt.Println(userAuth)
-		token, err := login(db, &userAuth)
-		if err != nil {
-			fmt.Println(err.Error())
-			return c.SendStatus(fiber.StatusUnauthorized)
-		}
+	// app.Post("/login", func(c fiber.Ctx) error {
+	// 	var userAuth entities.UserAuth
+	// 	if err := c.Bind().JSON(&userAuth); err != nil {
+	// 		return c.SendStatus(fiber.StatusBadRequest)
+	// 	}
+	// 	fmt.Println(userAuth)
+	// 	token, err := login(db, &userAuth)
+	// 	if err != nil {
+	// 		fmt.Println(err.Error())
+	// 		return c.SendStatus(fiber.StatusUnauthorized)
+	// 	}
 
-		return c.JSON(fiber.Map{
-			"message": "login succesful.",
-			"token":   token,
-		})
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "login succesful.",
+	// 		"token":   token,
+	// 	})
 
-	})
+	// })
 	// JWT Middleware
-	app.Use(authrequired)
+	app.Use(middleware.JwtMiddleware)
 	//app.Use("/users", authrequired)
-	app.Get("/users", func(c fiber.Ctx) error {
-		return c.JSON(getUsers(db))
-	})
+	// app.Get("/users", func(c fiber.Ctx) error {
+	// 	return c.JSON(getUsers(db))
+	// })
+	web.UserSetupRouter(db, app)
 	app.Listen(":8080")
 }
 func login(db *gorm.DB, user *entities.UserAuth) (string, error) {
@@ -213,14 +168,6 @@ func createUser(db *gorm.DB, user *entities.User) error {
 		return result.Error
 	}
 	return nil
-}
-func getUsers(db *gorm.DB) []entities.User {
-	var user []entities.User
-	result := db.Find(&user)
-	if result.Error != nil {
-		fmt.Printf("Error get books: %v", result.Error)
-	}
-	return user
 }
 func getUser(db *gorm.DB, id int) (*entities.User, error) {
 	var user entities.User

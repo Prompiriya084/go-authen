@@ -4,12 +4,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type RequestRegister struct {
-	UserID          uint   `json:"user_id"`
-	User            User   `json:"user"`
-	ConfirmPassword string `json:"confirm_password" validate:"required"` //validate:"required,confirm_password"
-}
-
 type User struct {
 	gorm.Model
 	Name       string   `json:"name" validate:"required"`
