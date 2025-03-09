@@ -34,8 +34,8 @@ func (s *AuthServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":      userAuth.Email,
-		"expireData": time.Now().Add(time.Hour * 1).Unix(),
+		"email":       userAuth.Email,
+		"expiredDate": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	t, err := token.SignedString([]byte(os.Getenv("Jwt_Secret")))
 	if err != nil {

@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -42,18 +44,37 @@ func JwtMiddleware(c fiber.Ctx) error {
 	}
 
 	// Parse Token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+	// 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	// 	}
+	// 	return []byte(os.Getenv("Jwt_Secret")), nil
+	// })
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("Jwt_Secret")), nil
 	})
-	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-	// 	return []byte(os.Getenv("Jwt_Secret")), nil
-	// })
 
 	if err != nil || !token.Valid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 	}
+
+	// Extract expiration time
+	exp, ok := claims["expiredDate"].(float64) // JWT stores `exp` as float64
+	if !ok {
+		//log.Println("Invalid expiration format")
+		return errors.New("Invalid expiration format")
+	}
+
+	expirationTime := time.Unix(int64(exp), 0)
+	if time.Now().After(expirationTime) {
+		//log.Println("Token has expired")
+		return errors.New("Token has expired")
+	}
+
+	fmt.Println("Token is valid and not expired")
 	return c.Next()
 }
