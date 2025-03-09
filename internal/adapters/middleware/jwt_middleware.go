@@ -48,6 +48,9 @@ func JwtMiddleware(c fiber.Ctx) error {
 		}
 		return []byte(os.Getenv("Jwt_Secret")), nil
 	})
+	// token, err := jwt.ParseWithClaims(tokenString, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// 	return []byte(os.Getenv("Jwt_Secret")), nil
+	// })
 
 	if err != nil || !token.Valid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})

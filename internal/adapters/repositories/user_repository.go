@@ -4,7 +4,6 @@ import (
 	entities "github.com/Prompiriya084/go-authen/internal/core/entities"
 	ports "github.com/Prompiriya084/go-authen/internal/core/ports"
 	"gorm.io/gorm"
-	// "gorm.io/gorm/logger"
 )
 
 type userRepositoryImpl struct {

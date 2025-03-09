@@ -7,5 +7,5 @@ import (
 type IUserRepository interface {
 	FindAll() ([]entities.User, error)
 	Create(user *entities.User) error
-	GetUserWithUserAuthByEmail(email string) (*entities.User, error)
+	GetWithUserAuthByEmail(email string) (*entities.User, error)
 }
