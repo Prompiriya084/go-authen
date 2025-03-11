@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	web "github.com/Prompiriya084/go-authen/Web/Routes"
+	"github.com/Prompiriya084/go-authen/config"
 	"github.com/Prompiriya084/go-authen/internal/adapters/middleware"
 	"github.com/Prompiriya084/go-authen/internal/infrastructure/database"
 	"github.com/gofiber/fiber/v3"
@@ -15,17 +16,13 @@ import (
 	//"gorm.io/gorm/logger"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 )
 
 var validate = validator.New()
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Warning: No .env file found")
-	}
 
+	config.LoadEnv()
 	db := database.InitDb()
 
 	fmt.Printf("Connect successful.")

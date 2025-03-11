@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/Prompiriya084/go-authen/internal/core/entities"
 	"github.com/gofiber/fiber/v3"
 
@@ -33,9 +35,16 @@ func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 		})
 	}
 
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 1), // for cookies only not jwt
+		HTTPOnly: true,                          // localhost
+	})
+
 	return c.JSON(fiber.Map{
 		"message": "login successful.",
-		"token":   token,
+		//"token":   token,
 	})
 }
 func (h *AuthenHandler) Register(c fiber.Ctx) error {

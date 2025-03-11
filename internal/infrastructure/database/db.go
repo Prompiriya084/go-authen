@@ -8,17 +8,13 @@ import (
 	"time"
 
 	"github.com/Prompiriya084/go-authen/internal/core/entities"
-	"github.com/joho/godotenv"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 func InitDb() *gorm.DB {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Warning: No .env file found")
-	}
 
 	host := os.Getenv("DB_Host")
 	port, _ := strconv.Atoi(os.Getenv("DB_Port"))
@@ -45,6 +41,7 @@ func InitDb() *gorm.DB {
 	if err != nil {
 		panic("Failed to connect database.")
 	}
+	fmt.Printf("Connect successful.")
 
 	db.AutoMigrate(entities.User{}, entities.UserAuth{})
 
