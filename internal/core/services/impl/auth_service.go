@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Prompiriya084/go-authen/internal/core/entities"
-	"github.com/Prompiriya084/go-authen/internal/core/ports"
+	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
 	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"

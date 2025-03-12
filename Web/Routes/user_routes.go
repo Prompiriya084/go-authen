@@ -15,6 +15,6 @@ func UserSetupRouter(db *gorm.DB, app *fiber.App) {
 	userHandler := handler.NewUserHandler(&service)
 
 	// JWT Middleware
-	app.Use("/users", middleware.JwtMiddleware)
+	app.Use("/users", middleware.JwtMiddleware(""))
 	app.Get("/users", userHandler.GetUsers)
 }

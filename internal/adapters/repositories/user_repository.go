@@ -2,7 +2,7 @@ package repositories
 
 import (
 	entities "github.com/Prompiriya084/go-authen/internal/core/entities"
-	ports "github.com/Prompiriya084/go-authen/internal/core/ports"
+	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
 	"gorm.io/gorm"
 )
 

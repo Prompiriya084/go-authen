@@ -52,3 +52,16 @@ func (s *jwtServiceImpl) GetClaims(token *jwt.Token) (map[string]interface{}, er
 	}
 	return nil, errors.New("invalid token claims")
 }
+
+// CheckRole checks if the user has the specified role in the JWT claims.
+func (s *jwtServiceImpl) CheckRole(claims map[string]interface{}, role string) bool {
+	if roles, ok := claims["roles"].([]interface{}); ok {
+		for _, r := range roles {
+			if rStr, ok := r.(string); ok && rStr == role {
+				return true
+			}
+		}
+	}
+	return false
+	//return errors.New("Forbidden: Insufficient role")
+}

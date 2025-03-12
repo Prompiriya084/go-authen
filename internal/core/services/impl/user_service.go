@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/Prompiriya084/go-authen/internal/core/entities"
-	ports "github.com/Prompiriya084/go-authen/internal/core/ports"
+	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
 	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
 	//"github.com/Prompiriya084/go-authen/internal/core/services"
 )
