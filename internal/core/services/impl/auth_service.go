@@ -2,22 +2,20 @@ package services
 
 import (
 	"errors"
-	"os"
-	"time"
 
 	"github.com/Prompiriya084/go-authen/internal/core/entities"
 	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
 	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthServiceImpl struct {
-	repo ports.IUserRepository
+	repo       ports.IUserRepository
+	jwtService services.IJwtService
 }
 
-func NewAuthService(repo ports.IUserRepository) services.IAuthService {
-	return &AuthServiceImpl{repo: repo}
+func NewAuthService(repo ports.IUserRepository, jwtService services.IJwtService) services.IAuthService {
+	return &AuthServiceImpl{repo: repo, jwtService: jwtService}
 }
 func (s *AuthServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 	selectedUserAuth, err := s.repo.GetWithUserAuthByEmail(userAuth.Email)
@@ -33,16 +31,11 @@ func (s *AuthServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 		return "", errors.New("email or password is incorrect.")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":       userAuth.Email,
-		"expiredDate": time.Now().Add(time.Hour * 1).Unix(),
-	})
-	t, err := token.SignedString([]byte(os.Getenv("Jwt_Secret")))
+	token, err := s.jwtService.GenerateToken(int(selectedUserAuth.ID))
 	if err != nil {
 		return "", err
 	}
-
-	return t, nil
+	return token, nil
 }
 
 func (s *AuthServiceImpl) Register(user *entities.User) error {

@@ -1,4 +1,4 @@
-package infrastructure
+package security
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Prompiriya084/go-authen/internal/core/ports"
+	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -14,8 +14,19 @@ type jwtServiceImpl struct {
 	secretKey string
 }
 
-func NewJwtService() ports.IJwtService {
+func NewJwtService() services.IJwtService {
 	return &jwtServiceImpl{secretKey: os.Getenv("Jwt_Secret")}
+}
+func (s *jwtServiceImpl) GenerateToken(userId int) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":     userId,
+		"expiredDate": time.Now().Add(time.Hour * 1).Unix(),
+	})
+	t, err := token.SignedString([]byte(os.Getenv("Jwt_Secret")))
+	if err != nil {
+		return "", err
+	}
+	return t, nil
 }
 func (s *jwtServiceImpl) ValidateToken(tokenString string) (*jwt.Token, error) {
 	claims := jwt.MapClaims{}

@@ -15,7 +15,7 @@ func NewUserService(repo ports.IUserRepository) services.IUserService {
 	return &userServiceImpl{repo: repo}
 }
 func (s *userServiceImpl) GetAll() ([]entities.User, error) {
-	return s.repo.FindAll()
+	return s.repo.GetAll()
 }
 func (s *userServiceImpl) Create(user *entities.User) error {
 	return s.repo.Create(user)

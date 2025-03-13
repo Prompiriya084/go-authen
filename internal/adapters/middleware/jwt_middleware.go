@@ -1,11 +1,15 @@
 package middleware
 
 import (
+	"fmt"
+
+	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
+	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
 	infrastructure "github.com/Prompiriya084/go-authen/internal/infrastructure/security"
 	"github.com/gofiber/fiber/v3"
 )
 
-func JwtMiddleware(requiredRole string) fiber.Handler {
+func JwtMiddleware(jwtService *services.IJwtService, userRepo ports.IUserRepository) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		// tokenString := c.Get("Authorization") // Get token from header
 		// if bearerString := strings.Split(tokenString, " "); bearerString[0] != "Bearer" {
@@ -20,9 +24,9 @@ func JwtMiddleware(requiredRole string) fiber.Handler {
 
 		tokenString := c.Cookies("jwt") //follow by create cookies name in sign in service
 		if tokenString == "" {
-			return c.Status(fiber.StatusUnauthorized).SendString("Missing token")
+			return c.Status(fiber.StatusUnauthorized).SendString("Missing token.")
 		}
-
+		fmt.Println(tokenString)
 		jwtService := infrastructure.NewJwtService()
 		jwtToken, err := jwtService.ValidateToken(tokenString)
 		if err != nil {
@@ -35,11 +39,16 @@ func JwtMiddleware(requiredRole string) fiber.Handler {
 		}
 		// fmt.Println(claims)
 		// fmt.Println(claims["email"])
-		if requiredRole != "" {
-			if !jwtService.CheckRole(claims, requiredRole) {
-				return c.Status(fiber.StatusUnauthorized).SendString("Forbidden: Insufficient role")
-			}
+		userId := claims["user_id"].(uint)
+
+		user, err := userRepo.GetById(userId)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).SendString("user not found.")
 		}
+		c.Locals("user_id", userId)
+		c.Locals("role", user.Role)
+
+		fmt.Println(c.Locals("user_id").(uint))
 
 		return c.Next()
 	}
