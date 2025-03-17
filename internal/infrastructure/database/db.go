@@ -7,8 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Prompiriya084/go-authen/internal/core/entities"
-
+	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -43,7 +42,7 @@ func InitDb() *gorm.DB {
 	}
 	fmt.Printf("Connect successful.")
 
-	db.AutoMigrate(entities.User{}, entities.UserAuth{})
+	db.AutoMigrate(entities.User{}, entities.UserAuth{}, entities.UserRole{}, entities.Role{})
 
 	return db
 }

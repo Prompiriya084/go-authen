@@ -3,13 +3,18 @@ package middleware
 import (
 	"fmt"
 
-	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
-	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
-	infrastructure "github.com/Prompiriya084/go-authen/internal/infrastructure/security"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/gofiber/fiber/v3"
 )
 
-func JwtMiddleware(jwtService *services.IJwtService, userRepo ports.IUserRepository) fiber.Handler {
+type JwtMiddleware struct {
+	service services.IJwtService
+}
+
+func NewJwtMiddleware(jwtService services.IJwtService) *JwtMiddleware {
+	return &JwtMiddleware{service: jwtService}
+}
+func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 	return func(c fiber.Ctx) error {
 		// tokenString := c.Get("Authorization") // Get token from header
 		// if bearerString := strings.Split(tokenString, " "); bearerString[0] != "Bearer" {
@@ -27,28 +32,32 @@ func JwtMiddleware(jwtService *services.IJwtService, userRepo ports.IUserReposit
 			return c.Status(fiber.StatusUnauthorized).SendString("Missing token.")
 		}
 		fmt.Println(tokenString)
-		jwtService := infrastructure.NewJwtService()
-		jwtToken, err := jwtService.ValidateToken(tokenString)
+		jwtToken, err := m.service.ValidateToken(tokenString)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
 		}
 
-		claims, err := jwtService.GetClaims(jwtToken)
+		claims, err := m.service.GetClaims(jwtToken)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
 		}
 		// fmt.Println(claims)
-		// fmt.Println(claims["email"])
-		userId := claims["user_id"].(uint)
-
-		user, err := userRepo.GetById(userId)
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).SendString("user not found.")
+		//mt.Println(claims["email"])
+		userIdfloat, ok := claims["user_id"].(float64)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).SendString("Invalid user format")
 		}
-		c.Locals("user_id", userId)
-		c.Locals("role", user.Role)
+		// userId := uint(userIdfloat)
 
-		fmt.Println(c.Locals("user_id").(uint))
+		// user, err := userServive.GetUser(userId)
+		// if err != nil {
+		// 	return c.Status(fiber.StatusUnauthorized).SendString("user not found.")
+		// }
+		c.Locals("user_id", userIdfloat)
+		// c.Locals("role", user.Role)
+
+		fmt.Println(c.Locals("user_id"))
+		// fmt.Println(c.Locals("role"))
 
 		return c.Next()
 	}

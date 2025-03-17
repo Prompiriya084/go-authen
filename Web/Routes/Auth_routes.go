@@ -1,21 +1,31 @@
 package web
 
 import (
-	"github.com/Prompiriya084/go-authen/internal/adapters/handlers"
-	middleware "github.com/Prompiriya084/go-authen/internal/adapters/middleware"
-	"github.com/Prompiriya084/go-authen/internal/adapters/repositories"
-	services "github.com/Prompiriya084/go-authen/internal/core/services/impl"
-	security "github.com/Prompiriya084/go-authen/internal/infrastructure/security"
+	handlers "github.com/Prompiriya084/go-authen/Internal/Adapters/Handlers"
+
+	middleware "github.com/Prompiriya084/go-authen/Internal/Adapters/Middleware"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Impl"
+	security "github.com/Prompiriya084/go-authen/Internal/Infrastructure/Security"
+
+	repositories "github.com/Prompiriya084/go-authen/Internal/Adapters/Repositories"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
 
 func AuthSetupRouter(db *gorm.DB, app *fiber.App) {
-	repo := repositories.NewUserRepository(db)
+	repoUser := repositories.NewUserRepository(db)
+	repoUserRole := repositories.NewUserRoleRepository(db)
+	repoRole := repositories.NewRoleRepository(db)
 	jwtService := security.NewJwtService()
-	service := services.NewAuthService(repo, jwtService)
-	authHandler := handlers.NewAuthHandler(&service)
+
+	serviceAuth := services.NewAuthService(repoUser, repoUserRole, repoRole, jwtService)
+	servicesUserRole := services.NewUserRoleService(repoUserRole)
+
+	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
+	roleMiddleware := middleware.NewRoleMiddleware(servicesUserRole)
+	authHandler := handlers.NewAuthHandler(&serviceAuth)
 	app.Post("/login", authHandler.SignIn)
-	//app.Use("/register", )
-	app.Post("/register", middleware.JwtMiddleware(&jwtService, repo), middleware.RoleMiddleware("admin"), authHandler.Register)
+
+	//app.Use("/register", jwtMiddleware.AuthMiddleware)
+	app.Post("/register", jwtMiddleware.AuthMiddleware(), roleMiddleware.RequiredRole("admin"), authHandler.Register)
 }

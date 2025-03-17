@@ -58,5 +58,6 @@ func main() {
 
 	web.AuthSetupRouter(db, app)
 	web.UserSetupRouter(db, app)
+	web.RoleSetupRouter(db, app)
 	app.Listen(":8080")
 }

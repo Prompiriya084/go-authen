@@ -1,23 +1,23 @@
 package web
 
 import (
-	handler "github.com/Prompiriya084/go-authen/internal/adapters/handlers"
-	middleware "github.com/Prompiriya084/go-authen/internal/adapters/middleware"
-	implRepositories "github.com/Prompiriya084/go-authen/internal/adapters/repositories"
-	services "github.com/Prompiriya084/go-authen/internal/core/services/impl"
-	"github.com/Prompiriya084/go-authen/internal/infrastructure/security"
+	handlers "github.com/Prompiriya084/go-authen/Internal/Adapters/Handlers"
+	middleware "github.com/Prompiriya084/go-authen/Internal/Adapters/Middleware"
+	repositories "github.com/Prompiriya084/go-authen/Internal/Adapters/Repositories"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Impl"
+	security "github.com/Prompiriya084/go-authen/Internal/Infrastructure/Security"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
 
 func UserSetupRouter(db *gorm.DB, app *fiber.App) {
-	repo := implRepositories.NewUserRepository(db)
+	repo := repositories.NewUserRepository(db)
 	service := services.NewUserService(repo)
-	userHandler := handler.NewUserHandler(&service)
+	userHandler := handlers.NewUserHandler(&service)
 
 	jwtService := security.NewJwtService()
-	jwtMiddleware := middleware.JwtMiddleware(&jwtService, repo)
+	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
 	// JWT Middleware
-	app.Use("/users", jwtMiddleware)
+	app.Use("/users", jwtMiddleware.AuthMiddleware())
 	app.Get("/users", userHandler.GetUsers)
 }

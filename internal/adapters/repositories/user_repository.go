@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	entities "github.com/Prompiriya084/go-authen/internal/core/entities"
-	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
+	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
+	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ func NewUserRepository(db *gorm.DB) ports.IUserRepository {
 	return &userRepositoryImpl{DB: db}
 }
 
-func (r *userRepositoryImpl) GetAll() ([]entities.User, error) {
+func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
 	var users []entities.User
 	if result := r.DB.Find(&users); result.Error != nil {
 		return nil, result.Error
@@ -22,7 +22,7 @@ func (r *userRepositoryImpl) GetAll() ([]entities.User, error) {
 
 	return users, nil
 }
-func (r *userRepositoryImpl) GetById(id uint) (*entities.User, error) {
+func (r *userRepositoryImpl) GetUser(id uint) (*entities.User, error) {
 	var user entities.User
 	if result := r.DB.First(&user, id); result.Error != nil {
 		return nil, result.Error
@@ -30,7 +30,7 @@ func (r *userRepositoryImpl) GetById(id uint) (*entities.User, error) {
 
 	return &user, nil
 }
-func (r *userRepositoryImpl) Create(user *entities.User) error {
+func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
 	if result := r.DB.Create(&user); result.Error != nil {
 		return result.Error
 	}

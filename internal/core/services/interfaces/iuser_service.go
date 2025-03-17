@@ -1,11 +1,12 @@
 package services
 
 import (
-	entities "github.com/Prompiriya084/go-authen/internal/core/entities"
+	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 )
 
 type IUserService interface {
-	GetAll() ([]entities.User, error)
-	Create(user *entities.User) error
+	GetUserAll() ([]entities.User, error)
+	GetUser(id uint) (*entities.User, error)
+	CreateUser(user *entities.User) error
 	GetWithUserAuthByEmail(email string) (*entities.User, error)
 }

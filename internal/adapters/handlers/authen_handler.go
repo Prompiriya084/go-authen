@@ -3,11 +3,11 @@ package handlers
 import (
 	"time"
 
-	"github.com/Prompiriya084/go-authen/internal/core/entities"
 	"github.com/gofiber/fiber/v3"
 
-	request "github.com/Prompiriya084/go-authen/internal/adapters/request"
-	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
+	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
+	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -58,10 +58,7 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	var user entities.User
-	user = request.User
-
-	if err := h.service.Register(&user); err != nil {
+	if err := h.service.Register(&request); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})

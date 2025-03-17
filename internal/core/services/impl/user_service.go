@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/Prompiriya084/go-authen/internal/core/entities"
-	ports "github.com/Prompiriya084/go-authen/internal/core/ports/repositories"
-	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
+	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
+	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	//"github.com/Prompiriya084/go-authen/internal/core/services"
 )
 
@@ -14,11 +14,14 @@ type userServiceImpl struct {
 func NewUserService(repo ports.IUserRepository) services.IUserService {
 	return &userServiceImpl{repo: repo}
 }
-func (s *userServiceImpl) GetAll() ([]entities.User, error) {
-	return s.repo.GetAll()
+func (s *userServiceImpl) GetUserAll() ([]entities.User, error) {
+	return s.repo.GetUserAll()
 }
-func (s *userServiceImpl) Create(user *entities.User) error {
-	return s.repo.Create(user)
+func (s *userServiceImpl) GetUser(id uint) (*entities.User, error) {
+	return s.repo.GetUser(id)
+}
+func (s *userServiceImpl) CreateUser(user *entities.User) error {
+	return s.repo.CreateUser(user)
 }
 func (s *userServiceImpl) GetWithUserAuthByEmail(email string) (*entities.User, error) {
 	return s.repo.GetWithUserAuthByEmail(email)

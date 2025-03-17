@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	services "github.com/Prompiriya084/go-authen/internal/core/services/interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -17,7 +17,7 @@ type jwtServiceImpl struct {
 func NewJwtService() services.IJwtService {
 	return &jwtServiceImpl{secretKey: os.Getenv("Jwt_Secret")}
 }
-func (s *jwtServiceImpl) GenerateToken(userId int) (string, error) {
+func (s *jwtServiceImpl) GenerateToken(userId uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":     userId,
 		"expiredDate": time.Now().Add(time.Hour * 1).Unix(),
