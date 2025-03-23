@@ -7,5 +7,5 @@ import (
 
 type IAuthService interface {
 	SignIn(userauth *entities.UserAuth) (string, error)
-	Register(request *request.RequestRegister) error
+	Register(requestRegister *request.RequestRegister) error
 }

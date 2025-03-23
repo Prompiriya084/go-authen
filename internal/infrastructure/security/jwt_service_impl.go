@@ -8,6 +8,7 @@ import (
 
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type jwtServiceImpl struct {
@@ -17,9 +18,9 @@ type jwtServiceImpl struct {
 func NewJwtService() services.IJwtService {
 	return &jwtServiceImpl{secretKey: os.Getenv("Jwt_Secret")}
 }
-func (s *jwtServiceImpl) GenerateToken(userId uint) (string, error) {
+func (s *jwtServiceImpl) GenerateToken(uuid uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id":     userId,
+		"user_id":     uuid,
 		"expiredDate": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	t, err := token.SignedString([]byte(os.Getenv("Jwt_Secret")))
@@ -44,7 +45,6 @@ func (s *jwtServiceImpl) ValidateToken(tokenString string) (*jwt.Token, error) {
 	// Extract expiration time
 	exp, ok := claims["expiredDate"].(float64) // JWT stores `exp` as float64
 	if !ok {
-		//log.Println("Invalid expiration format")
 		return nil, errors.New("Invalid expiration format")
 	}
 
@@ -74,5 +74,4 @@ func (s *jwtServiceImpl) CheckRole(claims map[string]interface{}, role string) b
 		}
 	}
 	return false
-	//return errors.New("Forbidden: Insufficient role")
 }

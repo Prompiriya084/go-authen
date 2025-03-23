@@ -22,19 +22,20 @@ func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
 
 	return users, nil
 }
-func (r *userRepositoryImpl) GetUser(id uint) (*entities.User, error) {
+func (r *userRepositoryImpl) GetUser(userId uint) (*entities.User, error) {
 	var user entities.User
-	if result := r.DB.First(&user, id); result.Error != nil {
+	if result := r.DB.First(&user, userId); result.Error != nil {
 		return nil, result.Error
 	}
 
 	return &user, nil
 }
-func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
-	if result := r.DB.Create(&user); result.Error != nil {
-		return result.Error
+func (r *userRepositoryImpl) GetByStruct(user *entities.User) (*entities.User, error) {
+	var selectedUser *entities.User
+	if result := r.DB.Where(&user).First(&selectedUser); result.Error != nil {
+		return nil, result.Error
 	}
-	return nil
+	return selectedUser, nil
 }
 func (r *userRepositoryImpl) GetWithUserAuthByEmail(email string) (*entities.User, error) {
 	// var userAuth entities.UserAuth
@@ -56,4 +57,10 @@ func (r *userRepositoryImpl) GetWithUserAuthByEmail(email string) (*entities.Use
 	}
 
 	return &user, nil
+}
+func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
+	if result := r.DB.Create(&user); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

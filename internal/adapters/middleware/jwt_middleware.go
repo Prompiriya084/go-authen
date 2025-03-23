@@ -16,6 +16,7 @@ func NewJwtMiddleware(jwtService services.IJwtService) *JwtMiddleware {
 }
 func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 	return func(c fiber.Ctx) error {
+		fmt.Println("Jwt middleware excuted!!!!")
 		// tokenString := c.Get("Authorization") // Get token from header
 		// if bearerString := strings.Split(tokenString, " "); bearerString[0] != "Bearer" {
 		// 	fmt.Println(bearerString[0])
@@ -31,7 +32,6 @@ func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).SendString("Missing token.")
 		}
-		fmt.Println(tokenString)
 		jwtToken, err := m.service.ValidateToken(tokenString)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
@@ -41,25 +41,20 @@ func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
 		}
-		// fmt.Println(claims)
-		//mt.Println(claims["email"])
-		userIdfloat, ok := claims["user_id"].(float64)
+
+		userId, ok := claims["user_id"].(uint)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).SendString("Invalid user format")
 		}
-		// userId := uint(userIdfloat)
+		// c.Locals("user_id", userIdfloat)
 
-		// user, err := userServive.GetUser(userId)
-		// if err != nil {
-		// 	return c.Status(fiber.StatusUnauthorized).SendString("user not found.")
-		// }
-		c.Locals("user_id", userIdfloat)
-		// c.Locals("role", user.Role)
-
-		fmt.Println(c.Locals("user_id"))
-		// fmt.Println(c.Locals("role"))
+		// fmt.Println(c.Locals("user_id"))
+		fiber.Locals[uint](c, "user_id", userId)
+		test := fiber.Locals[uint](c, "user_id")
+		fmt.Println(test)
 
 		return c.Next()
+
 	}
 
 }

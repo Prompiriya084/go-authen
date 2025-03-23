@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/gofiber/fiber/v3"
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v3"
 )
 
 type AuthenHandler struct {
@@ -49,10 +49,13 @@ func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 }
 func (h *AuthenHandler) Register(c fiber.Ctx) error {
 	var request request.RequestRegister
-
+	// localsUserId := c.Locals("user_id")
+	// userId, _ := localsUserId.(uint)
+	// fmt.Println(userId)
 	if err := c.Bind().JSON(&request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
+	fmt.Println(request)
 	var validate = validator.New()
 	if err := validate.Struct(request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -63,7 +66,6 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 			"message": err.Error(),
 		})
 	}
-
 	return c.JSON(fiber.Map{
 		"message": "register successfully.",
 	})

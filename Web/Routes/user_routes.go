@@ -2,10 +2,8 @@ package web
 
 import (
 	handlers "github.com/Prompiriya084/go-authen/Internal/Adapters/Handlers"
-	middleware "github.com/Prompiriya084/go-authen/Internal/Adapters/Middleware"
 	repositories "github.com/Prompiriya084/go-authen/Internal/Adapters/Repositories"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Impl"
-	security "github.com/Prompiriya084/go-authen/Internal/Infrastructure/Security"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
@@ -15,9 +13,9 @@ func UserSetupRouter(db *gorm.DB, app *fiber.App) {
 	service := services.NewUserService(repo)
 	userHandler := handlers.NewUserHandler(&service)
 
-	jwtService := security.NewJwtService()
-	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
+	// jwtService := security.NewJwtService()
+	// jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
 	// JWT Middleware
-	app.Use("/users", jwtMiddleware.AuthMiddleware())
+	//app.Use("/users", jwtMiddleware.AuthMiddleware())
 	app.Get("/users", userHandler.GetUsers)
 }

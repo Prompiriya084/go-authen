@@ -13,6 +13,6 @@ func RoleSetupRouter(db *gorm.DB, app *fiber.App) {
 	service := services.NewRoleService(repo)
 
 	handler := handlers.NewRoleHandler(service)
-
+	app.Get("/roles", handler.GetRoleAll)
 	app.Post("/role", handler.CreateRole)
 }

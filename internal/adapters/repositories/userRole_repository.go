@@ -22,17 +22,17 @@ func (r *userRoleRepositoryImpl) GetUserRoleAll() ([]entities.UserRole, error) {
 	return userRoles, nil
 }
 
-func (r *userRoleRepositoryImpl) GetUserRoles(userId uint) ([]entities.UserRole, error) {
-	var userRoles []entities.UserRole
+func (r *userRoleRepositoryImpl) GetUserRolesByStruct(userRole *entities.UserRole) ([]entities.UserRole, error) {
+	var selectedUserRoles []entities.UserRole
 	// if result := r.DB.Preload("User").Preload("Role").
 	// 	Where("user_id = ?", userId).
 	// 	Find(&userRoles); result.Error != nil {
 	// 	return nil, result.Error
 	// }
-	if result := r.DB.Find(&userRoles, userId); result.Error != nil {
+	if result := r.DB.Where(&userRole).Find(&selectedUserRoles); result.Error != nil {
 		return nil, result.Error
 	}
-	return userRoles, nil
+	return selectedUserRoles, nil
 }
 func (r *userRoleRepositoryImpl) CreateUserRole(userRole *entities.UserRole) error {
 	if result := r.DB.Create(&userRole); result.Error != nil {
