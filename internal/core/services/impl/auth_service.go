@@ -74,7 +74,7 @@ func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) err
 			}
 		}
 	}
-	hashedpassword, err := bcrypt.GenerateFromPassword([]byte(user.UserAuth.Password), bcrypt.DefaultCost)
+	hashedpassword, err := bcrypt.GenerateFromPassword([]byte(requestRegister.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}

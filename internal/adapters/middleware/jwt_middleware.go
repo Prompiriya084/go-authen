@@ -5,6 +5,7 @@ import (
 
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 )
 
 type JwtMiddleware struct {
@@ -42,16 +43,18 @@ func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).SendString(err.Error())
 		}
 
-		userId, ok := claims["user_id"].(uint)
+		userIdStr, ok := claims["user_id"].(string)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).SendString("Invalid user format")
 		}
-		// c.Locals("user_id", userIdfloat)
+		userId, err := uuid.Parse(userIdStr)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).SendString("Invalid UUID format")
+		}
+
+		c.Locals("user_id", userId)
 
 		// fmt.Println(c.Locals("user_id"))
-		fiber.Locals[uint](c, "user_id", userId)
-		test := fiber.Locals[uint](c, "user_id")
-		fmt.Println(test)
 
 		return c.Next()
 

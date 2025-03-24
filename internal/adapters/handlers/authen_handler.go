@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"time"
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
@@ -55,12 +54,14 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 	if err := c.Bind().JSON(&request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	fmt.Println(request)
+
 	var validate = validator.New()
 	if err := validate.Struct(request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-
+	if request.Password != request.ConfirmPassword {
+		return c.Status(fiber.StatusBadRequest).SendString("Password and confirm password is not equal.")
+	}
 	if err := h.service.Register(&request); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),

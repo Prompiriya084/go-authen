@@ -20,7 +20,7 @@ func NewRoleMiddleware(service services.UserRoleService) *RoleMiddleware {
 func (m *RoleMiddleware) RequiredRole(requiredRole string) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		fmt.Println("Required Role method!!!!")
-		localsUserId := fiber.Locals[uuid.UUID](c, "user_id")
+		localsUserId := c.Locals("user_id").(uuid.UUID)
 		fmt.Println(localsUserId)
 		// userId, ok := localsUserId.(uint)
 		// fmt.Println(userId)
@@ -35,7 +35,7 @@ func (m *RoleMiddleware) RequiredRole(requiredRole string) fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusForbidden).SendString("Cannot fetch roles")
 		}
-
+		fmt.Println(userRoles[0])
 		for _, userRole := range userRoles {
 			fmt.Println(userRole.Role.Name)
 			if strings.EqualFold(userRole.Role.Name, requiredRole) {

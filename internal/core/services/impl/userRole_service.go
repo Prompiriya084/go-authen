@@ -25,6 +25,13 @@ func (s *userRoleServiceImpl) GetUserRolesByStruct(userRole *entities.UserRole) 
 	}
 	return userRoles, nil
 }
+func (s *userRoleServiceImpl) GetUserRolesWithPreloadByStruct(userRole *entities.UserRole, preload *string) ([]entities.UserRole, error) {
+	userRoles, err := s.repo.GetUserRolesWithPreloadByStruct(userRole, preload)
+	if err != nil {
+		return nil, err
+	}
+	return userRoles, nil
+}
 func (s *userRoleServiceImpl) CreateUserRole(userRole *entities.UserRole) error {
 	if existingUserRoles, _ := s.repo.GetUserRolesByStruct(userRole); existingUserRoles != nil {
 		for _, existingUserRole := range existingUserRoles {
