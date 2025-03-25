@@ -71,3 +71,9 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 		"message": "register successfully.",
 	})
 }
+func (h *AuthenHandler) SignOut(c fiber.Ctx) error {
+	c.ClearCookie("jwt")
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "successfully sign out.",
+	})
+}
