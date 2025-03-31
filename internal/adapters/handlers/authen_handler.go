@@ -5,7 +5,7 @@ import (
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )

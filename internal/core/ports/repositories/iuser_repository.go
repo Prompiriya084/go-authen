@@ -6,8 +6,6 @@ import (
 
 type IUserRepository interface {
 	GetUserAll() ([]entities.User, error)
-	GetUser(userId uint) (*entities.User, error)
-	GetByStruct(user *entities.User) (*entities.User, error)
-	GetWithUserAuthByEmail(email string) (*entities.User, error)
+	GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error)
 	CreateUser(user *entities.User) error
 }

@@ -5,35 +5,31 @@ import (
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	"github.com/google/uuid"
 )
 
 type userRoleServiceImpl struct {
 	repo ports.IUserRoleRepository
 }
 
-func NewUserRoleService(repo ports.IUserRoleRepository) services.UserRoleService {
+func NewUserRoleService(repo ports.IUserRoleRepository) UserRoleService {
 	return &userRoleServiceImpl{repo: repo}
 }
 func (s *userRoleServiceImpl) GetUserRoleAll() ([]entities.UserRole, error) {
 	return s.repo.GetUserRoleAll()
 }
-func (s *userRoleServiceImpl) GetUserRolesByStruct(userRole *entities.UserRole) ([]entities.UserRole, error) {
-	userRoles, err := s.repo.GetUserRolesByStruct(userRole)
-	if err != nil {
-		return nil, err
-	}
-	return userRoles, nil
-}
-func (s *userRoleServiceImpl) GetUserRolesWithPreloadByStruct(userRole *entities.UserRole, preload *string) ([]entities.UserRole, error) {
-	userRoles, err := s.repo.GetUserRolesWithPreloadByStruct(userRole, preload)
+func (s *userRoleServiceImpl) GetUserRolesById(id uuid.UUID) ([]entities.UserRole, error) {
+	preload := []string{"Role"}
+	userRoles, err := s.repo.GetUserRolesWithFilters(&entities.UserRole{
+		UserID: id,
+	}, preload)
 	if err != nil {
 		return nil, err
 	}
 	return userRoles, nil
 }
 func (s *userRoleServiceImpl) CreateUserRole(userRole *entities.UserRole) error {
-	if existingUserRoles, _ := s.repo.GetUserRolesByStruct(userRole); existingUserRoles != nil {
+	if existingUserRoles, _ := s.repo.GetUserRolesWithFilters(userRole, nil); existingUserRoles != nil {
 		for _, existingUserRole := range existingUserRoles {
 			if existingUserRole.RoleID == userRole.RoleID {
 				return errors.New("This user has role exist.")

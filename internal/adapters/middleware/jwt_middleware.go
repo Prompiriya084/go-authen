@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 )
@@ -53,8 +53,6 @@ func (m *JwtMiddleware) AuthMiddleware() fiber.Handler {
 		}
 
 		c.Locals("user_id", userId)
-
-		// fmt.Println(c.Locals("user_id"))
 
 		return c.Next()
 

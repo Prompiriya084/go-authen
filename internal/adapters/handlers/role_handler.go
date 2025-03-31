@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
@@ -30,7 +30,7 @@ func (h *RoleHandler) GetRoleAll(c fiber.Ctx) error {
 		"data": roles,
 	})
 }
-func (h *RoleHandler) GetRoles(c fiber.Ctx) error {
+func (h *RoleHandler) GetRoleById(c fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 0, 64)
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -39,7 +39,7 @@ func (h *RoleHandler) GetRoles(c fiber.Ctx) error {
 
 	roles, err := h.service.GetRole(userId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusInternalServerError).SendString("Data not found")
 	}
 	if roles == nil {
 		return c.SendStatus(fiber.StatusNotFound)

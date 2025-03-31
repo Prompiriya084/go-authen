@@ -2,41 +2,45 @@ package services
 
 import (
 	"errors"
-	"fmt"
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+
+	// services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type authServiceImpl struct {
 	repoUser     ports.IUserRepository
+	repoUserAuth ports.IUserAuthRepository
 	repoUserRole ports.IUserRoleRepository
 	repoRole     ports.IRoleRepository
-	jwtService   services.IJwtService
+	jwtService   IJwtService
 }
 
 func NewAuthService(repoUser ports.IUserRepository,
+	repoUserAuth ports.IUserAuthRepository,
 	repoUserRole ports.IUserRoleRepository,
 	repoRole ports.IRoleRepository,
-	jwtService services.IJwtService) services.IAuthService {
+	jwtService IJwtService) IAuthService {
 	return &authServiceImpl{
 		repoUser:     repoUser,
+		repoUserAuth: repoUserAuth,
 		repoUserRole: repoUserRole,
 		repoRole:     repoRole,
 		jwtService:   jwtService,
 	}
 }
 func (s *authServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
-	user, err := s.repoUser.GetWithUserAuthByEmail(userAuth.Email)
+	selectedUserAuth, err := s.repoUserAuth.GetUserAuthWithFilters(&entities.UserAuth{
+		Email: userAuth.Email,
+	}, nil)
 	if err != nil {
 		return "", errors.New("email or password is incorrect.")
 	}
-	fmt.Println(user)
-	hashedpassword := user.UserAuth.Password
+	hashedpassword := selectedUserAuth.Password
 
 	if err := bcrypt.CompareHashAndPassword(
 		[]byte(hashedpassword),
@@ -45,7 +49,7 @@ func (s *authServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 		return "", errors.New("email or password is incorrect.")
 	}
 
-	token, err := s.jwtService.GenerateToken(user.UserAuth.ID)
+	token, err := s.jwtService.GenerateToken(selectedUserAuth.ID)
 	if err != nil {
 		return "", err
 	}
@@ -54,10 +58,14 @@ func (s *authServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 
 func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) error {
 
-	if user, _ := s.repoUser.GetWithUserAuthByEmail(requestRegister.Email); user != nil {
-		return errors.New("This user is already exists.")
+	if userAuth, _ := s.repoUserAuth.GetUserAuthWithFilters(&entities.UserAuth{
+		Email: requestRegister.Email,
+	}, nil); userAuth != nil {
+		return errors.New("This user is exists.")
 	}
-	if role, _ := s.repoRole.GetRole(requestRegister.Role); role == nil {
+	if role, _ := s.repoRole.GetRolesWithFilters(&entities.Role{
+		ID: requestRegister.Role,
+	}, nil); role == nil {
 		return errors.New("Role not found.")
 	}
 	user := entities.User{
@@ -65,9 +73,10 @@ func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) err
 		Name:    requestRegister.Name,
 		Surname: requestRegister.Surname,
 	}
-	fmt.Println(user)
 	//Check userRole is exists ?
-	if userRoles, _ := s.repoUserRole.GetUserRolesByStruct(&entities.UserRole{UserID: user.ID}); userRoles != nil {
+	if userRoles, _ := s.repoUserRole.GetUserRolesWithFilters(&entities.UserRole{
+		UserID: user.ID,
+	}, nil); userRoles != nil {
 		for _, userRole := range userRoles {
 			if userRole.Role.ID == requestRegister.Role {
 				return errors.New("This user has this role exist.")
@@ -81,7 +90,7 @@ func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) err
 	user.UserAuth.ID = user.ID
 	user.UserAuth.Email = requestRegister.Email
 	user.UserAuth.Password = string(hashedpassword)
-	fmt.Println(user)
+
 	if err := s.repoUser.CreateUser(&user); err != nil {
 		return err
 	}

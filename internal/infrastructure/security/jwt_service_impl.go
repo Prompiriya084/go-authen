@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )

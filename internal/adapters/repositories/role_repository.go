@@ -22,12 +22,22 @@ func (r *roleRepositoryImpl) GetRoleAll() ([]entities.Role, error) {
 	return roles, nil
 
 }
-func (r *roleRepositoryImpl) GetRole(id uint) (*entities.Role, error) {
-	var role entities.Role
-	if result := r.DB.First(&role, id); result.Error != nil {
+func (r *roleRepositoryImpl) GetRolesWithFilters(filters *entities.Role, preload []string) (*entities.Role, error) {
+	var selectedRoles *entities.Role
+	query := r.DB
+	for _, p := range preload {
+		query = query.Preload(p)
+	}
+
+	if filters != nil {
+		query = query.Where(filters)
+	}
+
+	if result := query.First(&selectedRoles); result.Error != nil {
 		return nil, result.Error
 	}
-	return &role, nil
+	return selectedRoles, nil
+
 }
 func (r *roleRepositoryImpl) CreateRole(role *entities.Role) error {
 	if result := r.DB.Create(&role); result.Error != nil {

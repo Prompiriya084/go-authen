@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 )
@@ -31,7 +30,7 @@ func (m *RoleMiddleware) RequiredRole(requiredRole string) fiber.Handler {
 		// 	return c.Status(fiber.StatusForbidden).SendString("access denied")
 		// }
 
-		userRoles, err := m.service.GetUserRolesByStruct(&entities.UserRole{UserID: localsUserId})
+		userRoles, err := m.service.GetUserRolesById(localsUserId)
 		if err != nil {
 			return c.Status(fiber.StatusForbidden).SendString("Cannot fetch roles")
 		}

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	services "github.com/Prompiriya084/go-authen/Internal/Core/Services/Interfaces"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/gofiber/fiber/v3"
 )
 
