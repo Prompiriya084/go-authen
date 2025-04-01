@@ -45,3 +45,16 @@ func (r *roleRepositoryImpl) CreateRole(role *entities.Role) error {
 	}
 	return nil
 }
+func (r *roleRepositoryImpl) UpdateRole(role *entities.Role) error {
+	if result := r.DB.Save(&role); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func (r *roleRepositoryImpl) DeleteRole(id uint) error {
+	role := new(entities.Role)
+	if result := r.DB.Delete(&role, id); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

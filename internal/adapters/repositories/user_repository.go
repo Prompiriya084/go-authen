@@ -3,6 +3,7 @@ package repositories
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,15 +23,6 @@ func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
 
 	return users, nil
 }
-
-// func (r *userRepositoryImpl) GetUser(userId uint) (*entities.User, error) {
-// 	var user entities.User
-// 	if result := r.DB.First(&user, userId); result.Error != nil {
-// 		return nil, result.Error
-// 	}
-
-//		return &user, nil
-//	}
 func (r *userRepositoryImpl) GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error) {
 	query := r.DB
 	var selectedUser *entities.User
@@ -50,6 +42,19 @@ func (r *userRepositoryImpl) GetUserWithFilters(filters map[string]interface{}, 
 
 func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
 	if result := r.DB.Create(&user); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func (r *userRepositoryImpl) UpdateUser(user *entities.User) error {
+	if result := r.DB.Save(&user); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func (r *userRepositoryImpl) DeleteUser(id uuid.UUID) error {
+	var user *entities.User
+	if result := r.DB.Delete(&user, id); result.Error != nil {
 		return result.Error
 	}
 	return nil

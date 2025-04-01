@@ -3,6 +3,7 @@ package repositories
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -40,6 +41,19 @@ func (r *userRoleRepositoryImpl) GetUserRolesWithFilters(filters *entities.UserR
 }
 func (r *userRoleRepositoryImpl) CreateUserRole(userRole *entities.UserRole) error {
 	if result := r.DB.Create(&userRole); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func (r *userRoleRepositoryImpl) UpdateUserRole(userRole *entities.UserRole) error {
+	if result := r.DB.Save(&userRole); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+func (r *userRoleRepositoryImpl) DeleteUserRole(id uuid.UUID) error {
+	var userRoles []entities.UserRole
+	if result := r.DB.Delete(&userRoles, id); result.Error != nil {
 		return result.Error
 	}
 	return nil

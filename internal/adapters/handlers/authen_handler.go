@@ -48,9 +48,6 @@ func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 }
 func (h *AuthenHandler) Register(c fiber.Ctx) error {
 	var request request.RequestRegister
-	// localsUserId := c.Locals("user_id")
-	// userId, _ := localsUserId.(uint)
-	// fmt.Println(userId)
 	if err := c.Bind().JSON(&request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
