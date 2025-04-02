@@ -20,7 +20,7 @@ func (m *RoleMiddleware) RequiredRole(requiredRole string) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		fmt.Println("Required Role method!!!!")
 		localsUserId := c.Locals("user_id").(uuid.UUID)
-		fmt.Println(localsUserId)
+		// fmt.Println(localsUserId)
 		// userId, ok := localsUserId.(uint)
 		// fmt.Println(userId)
 		// if !ok {

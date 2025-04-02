@@ -13,6 +13,8 @@ type RoleHandler struct {
 	service services.IRoleService
 }
 
+var validate = validator.New()
+
 func NewRoleHandler(service services.IRoleService) *RoleHandler {
 	return &RoleHandler{service: service}
 }
@@ -54,7 +56,7 @@ func (h *RoleHandler) CreateRole(c fiber.Ctx) error {
 	if err := c.Bind().JSON(&role); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	var validate = validator.New()
+
 	if err := validate.Struct(role); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
@@ -64,6 +66,41 @@ func (h *RoleHandler) CreateRole(c fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "create role successfully.",
+	})
+
+}
+func (h *RoleHandler) UpdateRole(c fiber.Ctx) error {
+	roleId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	var role *entities.Role
+	if err := c.Bind().JSON(&role); err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	if err := validate.Struct(role); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("invalid role data: " + err.Error())
+	}
+	role.ID = uint(roleId)
+	if err := h.service.UpdateRole(role); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Role updated successfully.",
+	})
+}
+func (h *RoleHandler) DeleteRole(c fiber.Ctx) error {
+	roleId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	if err := h.service.DeleteRole(uint(roleId)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "role deleted successfully.",
 	})
 
 }

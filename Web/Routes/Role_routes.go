@@ -29,4 +29,6 @@ func RoleSetupRouter(db *gorm.DB, app *fiber.App) {
 	appRole.Get("", handler.GetRoleAll)
 	appRole.Get("/:id", handler.GetRoleById)
 	appRole.Post("", handler.CreateRole)
+	appRole.Put("/:id", handler.UpdateRole)
+	appRole.Delete("/:id", handler.DeleteRole)
 }
