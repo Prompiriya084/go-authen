@@ -7,6 +7,7 @@ import (
 
 type IUserRepository interface {
 	GetUserAll() ([]entities.User, error)
+	GetUserAllWithFilters(filters map[string]interface{}, preload []string) ([]entities.User, error)
 	GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error)
 	CreateUser(user *entities.User) error
 	UpdateUser(user *entities.User) error

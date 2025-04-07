@@ -23,6 +23,22 @@ func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
 
 	return users, nil
 }
+func (r *userRepositoryImpl) GetUserAllWithFilters(filters map[string]interface{}, preload []string) ([]entities.User, error) {
+	query := r.DB
+	var selectedUsers []entities.User
+	for _, p := range preload {
+		query = query.Preload(p)
+	}
+
+	if len(filters) > 0 {
+		query = query.Where(filters)
+	}
+
+	if result := query.Find(&selectedUsers); result.Error != nil {
+		return nil, result.Error
+	}
+	return selectedUsers, nil
+}
 func (r *userRepositoryImpl) GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error) {
 	query := r.DB
 	var selectedUser *entities.User
