@@ -3,75 +3,95 @@ package repositories
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type userRepositoryImpl struct {
-	DB *gorm.DB
+	*GenericRepositoryImpl[entities.User]
+	db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) ports.IUserRepository {
-	return &userRepositoryImpl{DB: db}
+	return &userRepositoryImpl{
+		GenericRepositoryImpl: NewGenericRepository[entities.User](db),
+		db:                    db,
+	}
 }
 
-func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
-	var users []entities.User
-	if result := r.DB.Find(&users); result.Error != nil {
-		return nil, result.Error
-	}
+// func (r *userRepositoryImpl) GetWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error) {
+// 	var selectedUser *entities.User
+// 	query := r.db
+// 	for _, p := range preload {
+// 		query = query.Preload(p)
+// 	}
 
-	return users, nil
-}
-func (r *userRepositoryImpl) GetUserAllWithFilters(filters map[string]interface{}, preload []string) ([]entities.User, error) {
-	query := r.DB
-	var selectedUsers []entities.User
-	for _, p := range preload {
-		query = query.Preload(p)
-	}
+// 	if filters != nil {
+// 		query = query.Where(filters)
+// 	}
 
-	if len(filters) > 0 {
-		query = query.Where(filters)
-	}
+// 	if result := query.First(&selectedUser); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return selectedUser, nil
+// }
 
-	if result := query.Find(&selectedUsers); result.Error != nil {
-		return nil, result.Error
-	}
-	return selectedUsers, nil
-}
-func (r *userRepositoryImpl) GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error) {
-	query := r.DB
-	var selectedUser *entities.User
-	for _, p := range preload {
-		query = query.Preload(p)
-	}
+// func (r *userRepositoryImpl) GetUserAll() ([]entities.User, error) {
+// 	var users []entities.User
+// 	if result := r.DB.Find(&users); result.Error != nil {
+// 		return nil, result.Error
+// 	}
 
-	if len(filters) > 0 {
-		query = query.Where(filters)
-	}
+// 	return users, nil
+// }
+// func (r *userRepositoryImpl) GetUserAllWithFilters(filters map[string]interface{}, preload []string) ([]entities.User, error) {
+// 	query := r.DB
+// 	var selectedUsers []entities.User
+// 	for _, p := range preload {
+// 		query = query.Preload(p)
+// 	}
 
-	if result := query.First(&selectedUser); result.Error != nil {
-		return nil, result.Error
-	}
-	return selectedUser, nil
-}
+// 	if len(filters) > 0 {
+// 		query = query.Where(filters)
+// 	}
 
-func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
-	if result := r.DB.Create(&user); result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-func (r *userRepositoryImpl) UpdateUser(user *entities.User) error {
-	if result := r.DB.Save(&user); result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-func (r *userRepositoryImpl) DeleteUser(id uuid.UUID) error {
-	var user *entities.User
-	if result := r.DB.Delete(&user, id); result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
+// 	if result := query.Find(&selectedUsers); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return selectedUsers, nil
+// }
+// func (r *userRepositoryImpl) GetUserWithFilters(filters map[string]interface{}, preload []string) (*entities.User, error) {
+// 	query := r.DB
+// 	var selectedUser *entities.User
+// 	for _, p := range preload {
+// 		query = query.Preload(p)
+// 	}
+
+// 	if len(filters) > 0 {
+// 		query = query.Where(filters)
+// 	}
+
+// 	if result := query.First(&selectedUser); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return selectedUser, nil
+// }
+
+// func (r *userRepositoryImpl) CreateUser(user *entities.User) error {
+// 	if result := r.DB.Create(&user); result.Error != nil {
+// 		return result.Error
+// 	}
+// 	return nil
+// }
+// func (r *userRepositoryImpl) UpdateUser(user *entities.User) error {
+// 	if result := r.DB.Save(&user); result.Error != nil {
+// 		return result.Error
+// 	}
+// 	return nil
+// }
+// func (r *userRepositoryImpl) DeleteUser(id uuid.UUID) error {
+// 	var user *entities.User
+// 	if result := r.DB.Delete(&user, id); result.Error != nil {
+// 		return result.Error
+// 	}
+// 	return nil
+// }

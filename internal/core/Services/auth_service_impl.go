@@ -91,7 +91,7 @@ func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) err
 	user.UserAuth.Email = requestRegister.Email
 	user.UserAuth.Password = string(hashedpassword)
 
-	if err := s.repoUser.CreateUser(&user); err != nil {
+	if err := s.repoUser.Add(&user); err != nil {
 		return err
 	}
 
