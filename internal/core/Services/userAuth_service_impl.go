@@ -14,10 +14,10 @@ func NewUserAuthService(repo ports.IUserAuthRepository) UserAuthService {
 }
 
 func (s *userAuthServiceImpl) GetUserAuthAll() ([]entities.UserAuth, error) {
-	return s.repo.GetUserAuthAll()
+	return s.repo.GetAll(nil, nil)
 }
 func (s *userAuthServiceImpl) GetUserAuthByEmail(email string) (*entities.UserAuth, error) {
-	return s.repo.GetUserAuthWithFilters(&entities.UserAuth{
+	return s.repo.Get(&entities.UserAuth{
 		Email: email,
 	}, nil)
 }

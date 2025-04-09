@@ -7,40 +7,45 @@ import (
 )
 
 type userAuthRepositoryImpl struct {
+	*GenericRepositoryImpl[entities.UserAuth]
 	db *gorm.DB
 }
 
 func NewUserAuthRepository(db *gorm.DB) ports.IUserAuthRepository {
-	return &userAuthRepositoryImpl{db: db}
+	return &userAuthRepositoryImpl{
+		GenericRepositoryImpl: NewGenericRepository[entities.UserAuth](db),
+		db:                    db,
+	}
 }
-func (r *userAuthRepositoryImpl) GetUserAuthAll() ([]entities.UserAuth, error) {
-	var userAuths []entities.UserAuth
-	if result := r.db.Find(&userAuths); result.Error != nil {
-		return nil, result.Error
-	}
 
-	return userAuths, nil
-}
-func (r *userAuthRepositoryImpl) GetUserAuthWithFilters(filters *entities.UserAuth, preload []string) (*entities.UserAuth, error) {
-	var selectedUserAuth *entities.UserAuth
-	// fmt.Println("UserAuthRepo : ", userAuth)
-	// if result := r.db.Where(&userAuth).First(&selectedUserAuth); result.Error != nil {
-	// 	return nil, result.Error
-	// }
-	// return selectedUserAuth, nil
+// func (r *userAuthRepositoryImpl) GetUserAuthAll() ([]entities.UserAuth, error) {
+// 	var userAuths []entities.UserAuth
+// 	if result := r.db.Find(&userAuths); result.Error != nil {
+// 		return nil, result.Error
+// 	}
 
-	query := r.db
-	for _, p := range preload {
-		query = query.Preload(p)
-	}
+// 	return userAuths, nil
+// }
+// func (r *userAuthRepositoryImpl) GetUserAuthWithFilters(filters *entities.UserAuth, preload []string) (*entities.UserAuth, error) {
+// 	var selectedUserAuth *entities.UserAuth
+// 	// fmt.Println("UserAuthRepo : ", userAuth)
+// 	// if result := r.db.Where(&userAuth).First(&selectedUserAuth); result.Error != nil {
+// 	// 	return nil, result.Error
+// 	// }
+// 	// return selectedUserAuth, nil
 
-	if filters != nil {
-		query = query.Where(filters)
-	}
+// 	query := r.db
+// 	for _, p := range preload {
+// 		query = query.Preload(p)
+// 	}
 
-	if result := query.First(&selectedUserAuth); result.Error != nil {
-		return nil, result.Error
-	}
+// 	if filters != nil {
+// 		query = query.Where(filters)
+// 	}
 
-	return selectedUserAuth, nil
-}
+// 	if result := query.First(&selectedUserAuth); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+
+// 	return selectedUserAuth, nil
+// }

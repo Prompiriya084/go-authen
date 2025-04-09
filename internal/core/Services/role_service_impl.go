@@ -13,37 +13,39 @@ func NewRoleService(repo ports.IRoleRepository) IRoleService {
 	return &roleServiceImpl{repo: repo}
 }
 func (s *roleServiceImpl) GetRoleAll() ([]entities.Role, error) {
-	return s.repo.GetRoleAll()
+	return s.repo.GetAll(nil, nil)
 }
 func (s *roleServiceImpl) GetRole(id uint) (*entities.Role, error) {
-	return s.repo.GetRolesWithFilters(&entities.Role{
+	return s.repo.Get(&entities.Role{
 		ID: id,
 	}, nil)
 }
 func (s *roleServiceImpl) CreateRole(role *entities.Role) error {
-	return s.repo.CreateRole(role)
+	return s.repo.Add(role)
 }
 func (s *roleServiceImpl) UpdateRole(role *entities.Role) error {
-	selectedRole, err := s.repo.GetRolesWithFilters(&entities.Role{
+	selectedRole, err := s.repo.Get(&entities.Role{
 		ID: role.ID,
 	}, nil)
 	if err != nil {
 		return err
 	}
 	selectedRole.Name = role.Name
-	if err := s.repo.UpdateRole(selectedRole); err != nil {
+	if err := s.repo.Update(selectedRole); err != nil {
 		return err
 	}
 
 	return nil
 }
 func (s *roleServiceImpl) DeleteRole(id uint) error {
-	if _, err := s.repo.GetRolesWithFilters(&entities.Role{
+	selectedRole, err := s.repo.Get(&entities.Role{
 		ID: id,
-	}, nil); err != nil {
+	}, nil)
+	if err != nil {
 		return err
 	}
-	if err := s.repo.DeleteRole(id); err != nil {
+
+	if err := s.repo.Delete(selectedRole); err != nil {
 		return err
 	}
 

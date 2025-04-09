@@ -34,7 +34,7 @@ func NewAuthService(repoUser ports.IUserRepository,
 	}
 }
 func (s *authServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
-	selectedUserAuth, err := s.repoUserAuth.GetUserAuthWithFilters(&entities.UserAuth{
+	selectedUserAuth, err := s.repoUserAuth.Get(&entities.UserAuth{
 		Email: userAuth.Email,
 	}, nil)
 	if err != nil {
@@ -58,12 +58,12 @@ func (s *authServiceImpl) SignIn(userAuth *entities.UserAuth) (string, error) {
 
 func (s *authServiceImpl) Register(requestRegister *request.RequestRegister) error {
 
-	if userAuth, _ := s.repoUserAuth.GetUserAuthWithFilters(&entities.UserAuth{
+	if userAuth, _ := s.repoUserAuth.Get(&entities.UserAuth{
 		Email: requestRegister.Email,
 	}, nil); userAuth != nil {
 		return errors.New("This user is exists.")
 	}
-	if role, _ := s.repoRole.GetRolesWithFilters(&entities.Role{
+	if role, _ := s.repoRole.Get(&entities.Role{
 		ID: requestRegister.Role,
 	}, nil); role == nil {
 		return errors.New("Role not found.")
