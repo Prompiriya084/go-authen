@@ -4,19 +4,24 @@ import (
 	"strconv"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
+	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
 
 type RoleHandler struct {
-	service services.IRoleService
+	service   services.IRoleService
+	validator ports.Validator
 }
 
 var validate = validator.New()
 
-func NewRoleHandler(service services.IRoleService) *RoleHandler {
-	return &RoleHandler{service: service}
+func NewRoleHandler(service services.IRoleService, validator ports.Validator) *RoleHandler {
+	return &RoleHandler{
+		service:   service,
+		validator: validator,
+	}
 }
 
 func (h *RoleHandler) GetRoleAll(c fiber.Ctx) error {
@@ -57,7 +62,7 @@ func (h *RoleHandler) CreateRole(c fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	if err := validate.Struct(role); err != nil {
+	if err := h.validator.ValidateStruct(role); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	if err := h.service.CreateRole(role); err != nil {
@@ -78,7 +83,7 @@ func (h *RoleHandler) UpdateRole(c fiber.Ctx) error {
 	if err := c.Bind().JSON(&role); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if err := validate.Struct(role); err != nil {
+	if err := h.validator.ValidateStruct(role); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("invalid role data: " + err.Error())
 	}
 	role.ID = uint(roleId)

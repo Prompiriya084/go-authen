@@ -5,25 +5,28 @@ import (
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
+	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
 
 type AuthenHandler struct {
-	service services.IAuthService
+	service   services.IAuthService
+	validator ports.Validator
 }
 
-func NewAuthHandler(service *services.IAuthService) *AuthenHandler {
-	return &AuthenHandler{service: *service}
+func NewAuthHandler(service *services.IAuthService, validator ports.Validator) *AuthenHandler {
+	return &AuthenHandler{
+		service:   *service,
+		validator: validator,
+	}
 }
 func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 	var request entities.UserAuth
 	if err := c.Bind().JSON(&request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	var validate = validator.New()
-	if err := validate.Struct(request); err != nil {
+	if err := h.validator.ValidateStruct(request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
@@ -51,9 +54,7 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 	if err := c.Bind().JSON(&request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-
-	var validate = validator.New()
-	if err := validate.Struct(request); err != nil {
+	if err := h.validator.ValidateStruct(request); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	if request.Password != request.ConfirmPassword {

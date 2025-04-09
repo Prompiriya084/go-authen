@@ -4,6 +4,7 @@ import (
 	handlers "github.com/Prompiriya084/go-authen/Internal/Adapters/Handlers"
 	middleware "github.com/Prompiriya084/go-authen/Internal/Adapters/Middleware"
 	repositories "github.com/Prompiriya084/go-authen/Internal/Adapters/Repositories"
+	utilities "github.com/Prompiriya084/go-authen/Internal/Adapters/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	security "github.com/Prompiriya084/go-authen/Internal/Infrastructure/Security"
 	"github.com/gofiber/fiber/v3"
@@ -21,7 +22,9 @@ func RoleSetupRouter(db *gorm.DB, app *fiber.App) {
 
 	roleMiddleware := middleware.NewRoleMiddleware(userRoleService)
 
-	handler := handlers.NewRoleHandler(roleService)
+	validatorService := utilities.NewValidator()
+
+	handler := handlers.NewRoleHandler(roleService, validatorService)
 
 	appRole := app.Group("/role")
 	appRole.Use(jwtMiddleware.AuthMiddleware())
