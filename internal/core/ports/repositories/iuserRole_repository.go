@@ -1,4 +1,4 @@
-package ports
+package ports_repositories
 
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"

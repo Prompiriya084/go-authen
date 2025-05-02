@@ -4,15 +4,15 @@ import (
 	"errors"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 	"github.com/google/uuid"
 )
 
 type userRoleServiceImpl struct {
-	repo ports.IUserRoleRepository
+	repo ports_repositories.IUserRoleRepository
 }
 
-func NewUserRoleService(repo ports.IUserRoleRepository) UserRoleService {
+func NewUserRoleService(repo ports_repositories.IUserRoleRepository) UserRoleService {
 	return &userRoleServiceImpl{repo: repo}
 }
 func (s *userRoleServiceImpl) GetUserRoleAll() ([]entities.UserRole, error) {

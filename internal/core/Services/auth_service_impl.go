@@ -5,7 +5,7 @@ import (
 
 	request "github.com/Prompiriya084/go-authen/Internal/Adapters/Request"
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 
 	// services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/google/uuid"
@@ -13,17 +13,17 @@ import (
 )
 
 type authServiceImpl struct {
-	repoUser     ports.IUserRepository
-	repoUserAuth ports.IUserAuthRepository
-	repoUserRole ports.IUserRoleRepository
-	repoRole     ports.IRoleRepository
+	repoUser     ports_repositories.IUserRepository
+	repoUserAuth ports_repositories.IUserAuthRepository
+	repoUserRole ports_repositories.IUserRoleRepository
+	repoRole     ports_repositories.IRoleRepository
 	jwtService   IJwtService
 }
 
-func NewAuthService(repoUser ports.IUserRepository,
-	repoUserAuth ports.IUserAuthRepository,
-	repoUserRole ports.IUserRoleRepository,
-	repoRole ports.IRoleRepository,
+func NewAuthService(repoUser ports_repositories.IUserRepository,
+	repoUserAuth ports_repositories.IUserAuthRepository,
+	repoUserRole ports_repositories.IUserRoleRepository,
+	repoRole ports_repositories.IRoleRepository,
 	jwtService IJwtService) IAuthService {
 	return &authServiceImpl{
 		repoUser:     repoUser,

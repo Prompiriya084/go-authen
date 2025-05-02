@@ -1,31 +1,29 @@
 package services
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 	"github.com/google/uuid"
 	//"github.com/Prompiriya084/go-authen/internal/core/services"
 )
 
 type userServiceImpl struct {
-	repo ports.IUserRepository
+	repo ports_repositories.IUserRepository
 }
 
-func NewUserService(repo ports.IUserRepository) IUserService {
+func NewUserService(repo ports_repositories.IUserRepository) IUserService {
 	return &userServiceImpl{repo: repo}
 }
 func (s *userServiceImpl) GetUserAll() ([]entities.User, error) {
 	return s.repo.GetAll(nil, nil)
 }
-func (s *userServiceImpl) GetUser(id uint) (*entities.User, error) {
+func (s *userServiceImpl) GetUser(id string) (*entities.User, error) {
 	// filters := map[string]interface{}{
 	// 	"id": id,
 	// }
-	var uuid uuid.UUID
-	binary.BigEndian.PutUint64(uuid[8:], uint64(id))
+	uuid, _ := uuid.Parse(id)
 	return s.repo.Get(&entities.User{
 		ID: uuid,
 	}, []string{"UserAuth"})

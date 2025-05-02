@@ -1,0 +1,361 @@
+basePath: /api
+definitions:
+  entities.Role:
+    description: Represents the Role entity in the system
+    properties:
+      created_at:
+        type: string
+      delete_at:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    type: object
+  entities.User:
+    description: Represents the User entity in the system
+    properties:
+      created_at:
+        type: string
+      delete_at:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+      updated_at:
+        type: string
+      userauth:
+        $ref: '#/definitions/entities.UserAuth'
+      userauth_id:
+        description: '`json:"userauth_id"` //meaning fk'
+        type: string
+    required:
+    - name
+    - surname
+    type: object
+  entities.UserAuth:
+    description: Represents the User entity in the system
+    properties:
+      email:
+        description: must send with xxx@xxxx
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.RequestRegister:
+    properties:
+      confirm_password:
+        description: validate:"required,confirm_password"
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: integer
+      surname:
+        type: string
+    required:
+    - confirm_password
+    - email
+    - name
+    - password
+    - role
+    - surname
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Swagger with Fiber v3
+  title: Fiber v3 Swagger Example
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: UserAuth data
+        in: body
+        name: userauth
+        required: true
+        schema:
+          $ref: '#/definitions/entities.UserAuth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Hello example
+      tags:
+      - UserAuth
+  /register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: RequestRegister data
+        in: body
+        name: RequestRegister
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestRegister'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - UserAuth
+  /role:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Role'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Role'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Role
+  /role/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: The ID of the resource
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Role'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Role
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The ID of the resource
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Role'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: The ID of the resource
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Role'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Role
+  /signout:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - UserAuth
+  /users:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.User'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The ID of the resource
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.User'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Users
+  /users/getByEmail/{email}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The email of the resource
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.User'
+      security:
+      - CookieAuth: []
+      summary: Hello example
+      tags:
+      - Users
+swagger: "2.0"

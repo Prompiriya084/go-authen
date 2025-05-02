@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"strconv"
 
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/gofiber/fiber/v3"
@@ -15,6 +14,15 @@ type UserHandler struct {
 func NewUserHandler(service *services.IUserService) *UserHandler {
 	return &UserHandler{service: *service}
 }
+
+// HelloHandler godoc
+// @Summary Hello example
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Success 200 {object} entities.User
+// @Router /users [get]
 func (h *UserHandler) GetUsers(c fiber.Ctx) error {
 	users, err := h.service.GetUserAll()
 	if err != nil {
@@ -24,12 +32,23 @@ func (h *UserHandler) GetUsers(c fiber.Ctx) error {
 	}
 	return c.JSON(users)
 }
+
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param   id   path     string  true  "The ID of the resource"
+// @Success 200 {object} entities.User
+// @Failure 401 {object} entities.User
+// @Router /users/{id} [get]
 func (h *UserHandler) GetUserById(c fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	user, err := h.service.GetUser(uint(id))
+	user, err := h.service.GetUser(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -38,6 +57,17 @@ func (h *UserHandler) GetUserById(c fiber.Ctx) error {
 		"data": user,
 	})
 }
+
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param   email   path     string  true  "The email of the resource"
+// @Success 200 {object} entities.User
+// @Failure 401 {object} entities.User
+// @Router /users/getByEmail/{email} [get]
 func (h *UserHandler) GetUserByEmail(c fiber.Ctx) error {
 	fmt.Println("user_handler Get email method!!!!")
 	email := c.Params("email")

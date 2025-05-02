@@ -2,14 +2,14 @@ package services
 
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 )
 
 type userAuthServiceImpl struct {
-	repo ports.IUserAuthRepository
+	repo ports_repositories.IUserAuthRepository
 }
 
-func NewUserAuthService(repo ports.IUserAuthRepository) UserAuthService {
+func NewUserAuthService(repo ports_repositories.IUserAuthRepository) UserAuthService {
 	return &userAuthServiceImpl{repo: repo}
 }
 

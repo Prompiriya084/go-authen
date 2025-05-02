@@ -21,6 +21,16 @@ func NewAuthHandler(service *services.IAuthService, validator ports.Validator) *
 		validator: validator,
 	}
 }
+
+// UserAuthHandler godoc
+// @Summary Hello example
+// @Tags UserAuth
+// @Accept json
+// @Produce json
+// @Param userauth body entities.UserAuth true "UserAuth data"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /login [post]
 func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 	var request entities.UserAuth
 	if err := c.Bind().JSON(&request); err != nil {
@@ -49,6 +59,17 @@ func (h *AuthenHandler) SignIn(c fiber.Ctx) error {
 		//"token":   token,
 	})
 }
+
+// UserAuthHandler godoc
+// @Summary Hello example
+// @Tags UserAuth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param RequestRegister body request.RequestRegister true "RequestRegister data"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /register [post]
 func (h *AuthenHandler) Register(c fiber.Ctx) error {
 	var request request.RequestRegister
 	if err := c.Bind().JSON(&request); err != nil {
@@ -69,6 +90,16 @@ func (h *AuthenHandler) Register(c fiber.Ctx) error {
 		"message": "register successfully.",
 	})
 }
+
+// UserAuthHandler godoc
+// @Summary Hello example
+// @Tags UserAuth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /signout [post]
 func (h *AuthenHandler) SignOut(c fiber.Ctx) error {
 	c.ClearCookie("jwt")
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

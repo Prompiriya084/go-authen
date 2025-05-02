@@ -1,4 +1,4 @@
-package ports
+package ports_repositories
 
 type IRepository[Tentity any] interface {
 	GetAll(filters *Tentity, preload []string) ([]Tentity, error)

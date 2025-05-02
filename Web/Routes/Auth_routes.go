@@ -28,9 +28,11 @@ func AuthSetupRouter(db *gorm.DB, app *fiber.App) {
 	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
 	roleMiddleware := middleware.NewRoleMiddleware(servicesUserRole)
 	authHandler := handlers.NewAuthHandler(&serviceAuth, validatorService)
-	app.Post("/login", authHandler.SignIn)
-	app.Use([]string{"/register", "/signout"}, jwtMiddleware.AuthMiddleware())
-	app.Use("/register", roleMiddleware.RequiredRole("admin"))
-	app.Post("/register", authHandler.Register)
-	app.Post("/signout", authHandler.SignOut)
+
+	appApi := app.Group("api")
+	appApi.Post("/login", authHandler.SignIn)
+	appApi.Use([]string{"/register", "/signout"}, jwtMiddleware.AuthMiddleware())
+	appApi.Use("/register", roleMiddleware.RequiredRole("admin"))
+	appApi.Post("/register", authHandler.Register)
+	appApi.Post("/signout", authHandler.SignOut)
 }

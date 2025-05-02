@@ -2,14 +2,14 @@ package services
 
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
 )
 
 type roleServiceImpl struct {
-	repo ports.IRoleRepository
+	repo ports_repositories.IRoleRepository
 }
 
-func NewRoleService(repo ports.IRoleRepository) IRoleService {
+func NewRoleService(repo ports_repositories.IRoleRepository) IRoleService {
 	return &roleServiceImpl{repo: repo}
 }
 func (s *roleServiceImpl) GetRoleAll() ([]entities.Role, error) {

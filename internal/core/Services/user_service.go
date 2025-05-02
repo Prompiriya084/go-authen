@@ -6,7 +6,7 @@ import (
 
 type IUserService interface {
 	GetUserAll() ([]entities.User, error)
-	GetUser(id uint) (*entities.User, error)
+	GetUser(id string) (*entities.User, error)
 	GetUserByEmail(email string) (*entities.User, error)
 	CreateUser(user *entities.User) error
 }

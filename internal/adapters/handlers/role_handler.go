@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
+	ports_utilities "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
@@ -12,18 +12,27 @@ import (
 
 type RoleHandler struct {
 	service   services.IRoleService
-	validator ports.Validator
+	validator ports_utilities.Validator
 }
 
 var validate = validator.New()
 
-func NewRoleHandler(service services.IRoleService, validator ports.Validator) *RoleHandler {
+func NewRoleHandler(service services.IRoleService, validator ports_utilities.Validator) *RoleHandler {
 	return &RoleHandler{
 		service:   service,
 		validator: validator,
 	}
 }
 
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Role
+// @Accept  json
+// @Produce json
+// @Security CookieAuth
+// @Success 200 {object} entities.Role
+// @Failure 401 {object} entities.Role
+// @Router /role [get]
 func (h *RoleHandler) GetRoleAll(c fiber.Ctx) error {
 	roles, err := h.service.GetRoleAll()
 	if err != nil {
@@ -37,6 +46,17 @@ func (h *RoleHandler) GetRoleAll(c fiber.Ctx) error {
 		"data": roles,
 	})
 }
+
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Param   id   path     string  true  "The ID of the resource"
+// @Security CookieAuth
+// @Success 200 {object} entities.Role
+// @Failure 401 {object} entities.Role
+// @Router /role/{id} [get]
 func (h *RoleHandler) GetRoleById(c fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 0, 64)
 	if err != nil {
@@ -56,6 +76,17 @@ func (h *RoleHandler) GetRoleById(c fiber.Ctx) error {
 		"data": roles,
 	})
 }
+
+// CreateUser godoc
+// @Summary Hello example
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param role body entities.Role true "Role data"
+// @Success 200 {object} entities.Role
+// @Failure 401 {object} entities.Role
+// @Router /role [post]
 func (h *RoleHandler) CreateRole(c fiber.Ctx) error {
 	var role *entities.Role
 	if err := c.Bind().JSON(&role); err != nil {
@@ -74,6 +105,18 @@ func (h *RoleHandler) CreateRole(c fiber.Ctx) error {
 	})
 
 }
+
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param   id   path     string  true  "The ID of the resource"
+// @Param role body entities.Role true "Role data"
+// @Success 200 {object} entities.Role
+// @Failure 401 {object} entities.Role
+// @Router /role/{id} [put]
 func (h *RoleHandler) UpdateRole(c fiber.Ctx) error {
 	roleId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -95,6 +138,17 @@ func (h *RoleHandler) UpdateRole(c fiber.Ctx) error {
 		"message": "Role updated successfully.",
 	})
 }
+
+// RolesHandler godoc
+// @Summary Hello example
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param   id   path     string  true  "The ID of the resource"
+// @Success 200 {object} entities.Role
+// @Failure 401 {object} entities.Role
+// @Router /role/{id} [delete]
 func (h *RoleHandler) DeleteRole(c fiber.Ctx) error {
 	roleId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {

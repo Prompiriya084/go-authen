@@ -26,9 +26,10 @@ func RoleSetupRouter(db *gorm.DB, app *fiber.App) {
 
 	handler := handlers.NewRoleHandler(roleService, validatorService)
 
-	appRole := app.Group("/role")
+	appRole := app.Group("api/role")
 	appRole.Use(jwtMiddleware.AuthMiddleware())
 	appRole.Use(roleMiddleware.RequiredRole("admin"))
+
 	appRole.Get("", handler.GetRoleAll)
 	appRole.Get("/:id", handler.GetRoleById)
 	appRole.Post("", handler.CreateRole)
