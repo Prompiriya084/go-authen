@@ -3,16 +3,21 @@ package handlers
 import (
 	"fmt"
 
+	ports_utilities "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
 	"github.com/gofiber/fiber/v3"
 )
 
 type UserHandler struct {
-	service services.IUserService
+	service   services.IUserService
+	validator ports_utilities.Validator
 }
 
-func NewUserHandler(service *services.IUserService) *UserHandler {
-	return &UserHandler{service: *service}
+func NewUserHandler(service *services.IUserService, validator *ports_utilities.Validator) *UserHandler {
+	return &UserHandler{
+		service:   *service,
+		validator: *validator,
+	}
 }
 
 // HelloHandler godoc
@@ -24,7 +29,8 @@ func NewUserHandler(service *services.IUserService) *UserHandler {
 // @Success 200 {object} entities.User
 // @Router /users [get]
 func (h *UserHandler) GetUsers(c fiber.Ctx) error {
-	users, err := h.service.GetUserAll()
+
+	users, err := h.service.GetUserAll(nil)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),

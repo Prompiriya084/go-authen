@@ -1,7 +1,12 @@
 package main
 
 import (
+	handlers "github.com/Prompiriya084/go-authen/Internal/Adapters/Handlers"
 	middleware "github.com/Prompiriya084/go-authen/Internal/Adapters/Middleware"
+	repositories "github.com/Prompiriya084/go-authen/Internal/Adapters/Repositories"
+	utilities "github.com/Prompiriya084/go-authen/Internal/Adapters/Utilities"
+	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
+	security "github.com/Prompiriya084/go-authen/Internal/Infrastructure/Security"
 	web "github.com/Prompiriya084/go-authen/Web/Routes"
 	"github.com/Prompiriya084/go-authen/config"
 	_ "github.com/Prompiriya084/go-authen/docs"
@@ -40,8 +45,30 @@ func main() {
 	loggingMiddleware := middleware.NewLoggingMiddleware()
 	app.Use(loggingMiddleware.Console)
 
-	web.AuthSetupRouter(db, app)
-	web.UserSetupRouter(db, app)
-	web.RoleSetupRouter(db, app)
+	jwtService := security.NewJwtService()
+	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
+
+	validator := utilities.NewValidator()
+
+	//Repositories
+	roleRepo := repositories.NewRoleRepository(db)
+	userRepo := repositories.NewUserRepository(db)
+	userroleRepo := repositories.NewUserRoleRepository(db)
+	userauthRepo := repositories.NewUserAuthRepository(db)
+	//Services
+	userService := services.NewUserService(userRepo)
+	userroleService := services.NewUserRoleService(userroleRepo)
+	authService := services.NewAuthService(userRepo, userauthRepo, userroleRepo, roleRepo, jwtService)
+	roleService := services.NewRoleService(roleRepo)
+	//Handlers
+	userHandler := handlers.NewUserHandler(&userService, &validator)
+	authHandler := handlers.NewAuthHandler(&authService, &validator)
+	roleHandler := handlers.NewRoleHandler(&roleService, &validator)
+
+	roleMiddleware := middleware.NewRoleMiddleware(userroleService)
+	//Web routes
+	web.UserSetupRouter(app, jwtMiddleware, userHandler)
+	web.AuthSetupRouter(app, roleMiddleware, jwtMiddleware, authHandler)
+	web.RoleSetupRouter(app, roleMiddleware, jwtMiddleware, roleHandler)
 	app.Listen(":8080")
 }

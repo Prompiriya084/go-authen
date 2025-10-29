@@ -16,7 +16,7 @@ type userServiceImpl struct {
 func NewUserService(repo ports_repositories.IUserRepository) IUserService {
 	return &userServiceImpl{repo: repo}
 }
-func (s *userServiceImpl) GetUserAll() ([]entities.User, error) {
+func (s *userServiceImpl) GetUserAll(filters *entities.User) ([]entities.User, error) {
 	return s.repo.GetAll(nil, nil)
 }
 func (s *userServiceImpl) GetUser(id string) (*entities.User, error) {

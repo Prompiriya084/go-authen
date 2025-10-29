@@ -3,19 +3,24 @@ package notification
 import (
 	"fmt"
 
-	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports_notification "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Notification"
 )
 
-type EmailNotificationImpl struct {
-	Sender string
+type emailNotificationImpl struct {
+	Sender   string
+	Receiver []*string
+	Cc       []*string
 }
 
-func NewEmailNotification(defaultSender string) ports_notification.EmailNotification {
-	return &EmailNotificationImpl{Sender: defaultSender}
+func NewEmailNotification(defaultSender string, defaultReceiver []*string, defaultCC []*string) ports_notification.EmailNotification {
+	return &emailNotificationImpl{
+		Sender:   defaultSender,
+		Receiver: defaultReceiver,
+		Cc:       defaultCC,
+	}
 }
 
-func (n *EmailNotificationImpl) Send(message *entities.NotificationMessage) error {
+func (n *emailNotificationImpl) Notify(bodyMessage string) error {
 	fmt.Println(n.Sender)
 	return nil
 }

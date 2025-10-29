@@ -1,5 +1,5 @@
 package ports_notification
 
-type Notification interface {
+type SMSNotification interface {
 	Notify(bodyMessage string) error
 }

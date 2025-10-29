@@ -6,7 +6,6 @@ import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
 	ports_utilities "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Utilities"
 	services "github.com/Prompiriya084/go-authen/Internal/Core/Services"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -15,12 +14,10 @@ type RoleHandler struct {
 	validator ports_utilities.Validator
 }
 
-var validate = validator.New()
-
-func NewRoleHandler(service services.IRoleService, validator ports_utilities.Validator) *RoleHandler {
+func NewRoleHandler(service *services.IRoleService, validator *ports_utilities.Validator) *RoleHandler {
 	return &RoleHandler{
-		service:   service,
-		validator: validator,
+		service:   *service,
+		validator: *validator,
 	}
 }
 

@@ -2,7 +2,8 @@ package repositories
 
 import (
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
-	ports "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+	ports_repositories "github.com/Prompiriya084/go-authen/Internal/Core/Ports/Repositories"
+
 	"gorm.io/gorm"
 )
 
@@ -11,7 +12,7 @@ type roleRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewRoleRepository(db *gorm.DB) ports.IRoleRepository {
+func NewRoleRepository(db *gorm.DB) ports_repositories.IRoleRepository {
 	return &roleRepositoryImpl{
 		GenericRepositoryImpl: NewGenericRepository[entities.Role](db),
 		db:                    db,

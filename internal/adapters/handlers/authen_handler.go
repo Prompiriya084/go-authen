@@ -15,10 +15,10 @@ type AuthenHandler struct {
 	validator ports.Validator
 }
 
-func NewAuthHandler(service *services.IAuthService, validator ports.Validator) *AuthenHandler {
+func NewAuthHandler(service *services.IAuthService, validator *ports.Validator) *AuthenHandler {
 	return &AuthenHandler{
 		service:   *service,
-		validator: validator,
+		validator: *validator,
 	}
 }
 
