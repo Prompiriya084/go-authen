@@ -54,7 +54,7 @@ func (h *UserHandler) GetUserById(c fiber.Ctx) error {
 	if id == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	user, err := h.service.GetUser(id)
+	user, err := h.service.GetUserById(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

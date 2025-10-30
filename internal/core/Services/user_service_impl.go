@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 
 	entities "github.com/Prompiriya084/go-authen/Internal/Core/Entities"
@@ -19,10 +20,7 @@ func NewUserService(repo ports_repositories.IUserRepository) IUserService {
 func (s *userServiceImpl) GetUserAll(filters *entities.User) ([]entities.User, error) {
 	return s.repo.GetAll(nil, nil)
 }
-func (s *userServiceImpl) GetUser(id string) (*entities.User, error) {
-	// filters := map[string]interface{}{
-	// 	"id": id,
-	// }
+func (s *userServiceImpl) GetUserById(id string) (*entities.User, error) {
 	uuid, _ := uuid.Parse(id)
 	return s.repo.Get(&entities.User{
 		ID: uuid,
@@ -45,5 +43,13 @@ func (s *userServiceImpl) GetUserByEmail(email string) (*entities.User, error) {
 	return selectedUser, nil
 }
 func (s *userServiceImpl) CreateUser(user *entities.User) error {
+	existingUser, err := s.repo.Get(user, nil)
+	if err != nil {
+		return err
+	}
+	if existingUser != nil {
+		return errors.New("The user already exists")
+	}
+
 	return s.repo.Add(user)
 }

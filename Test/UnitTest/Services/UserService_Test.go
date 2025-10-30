@@ -72,8 +72,63 @@ func TestGetAll(t *testing.T) {
 		})
 	}
 }
-func TestGet(t *testing.T) {
+func TestGetById(t *testing.T) {
+	userid := uuid.New()
+	useridString := userid.String()
+	userauthId := uuid.New()
+	mockData := &entities.User{
+		ID:         userid,
+		Name:       "Name1",
+		Surname:    "Surname1",
+		UserAuthID: userauthId,
+	}
 
+	testcase := []struct {
+		description       string
+		sendingFilter     string
+		mockReturnedData  *entities.User
+		mockReturnedError error
+		expection         *entities.User
+	}{
+		{
+			description:       "[OK]Sending nothing",
+			sendingFilter:     "",
+			mockReturnedData:  nil,
+			mockReturnedError: nil,
+			expection:         nil,
+		},
+		{
+			description:       "[OK]Sending id params",
+			sendingFilter:     useridString,
+			mockReturnedData:  mockData,
+			mockReturnedError: nil,
+			expection:         mockData,
+		},
+
+		{
+			description:       "[Error]User not found.",
+			sendingFilter:     uuid.New().String(),
+			mockReturnedData:  nil,
+			mockReturnedError: nil,
+			expection:         nil,
+		},
+	}
+	for _, tc := range testcase {
+		t.Run(tc.description, func(t *testing.T) {
+			mockRepo := &mockitem_repositories.MockUserRepository{
+				MockRepositoryImpl: mockitem_repositories.MockRepositoryImpl[entities.User]{
+					GetFn: func(filters *entities.User, preload []string) (*entities.User, error) {
+						return tc.mockReturnedData, tc.mockReturnedError
+					},
+				},
+			}
+			userService := services.NewUserService(mockRepo)
+			response, err := userService.GetUserById(tc.sendingFilter)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expection, response)
+		})
+	}
 }
 func TestCreate(t *testing.T) {
 

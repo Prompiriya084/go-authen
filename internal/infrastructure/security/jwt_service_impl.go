@@ -33,7 +33,7 @@ func (s *jwtServiceImpl) ValidateToken(tokenString string) (*jwt.Token, error) {
 	claims := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method.")
+			return nil, errors.New("Unexpected signing method.")
 		}
 		return []byte(s.secretKey), nil
 	})
@@ -61,7 +61,7 @@ func (s *jwtServiceImpl) GetClaims(token *jwt.Token) (map[string]interface{}, er
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return claims, nil
 	}
-	return nil, errors.New("invalid token claims")
+	return nil, errors.New("Invalid token claims")
 }
 
 // CheckRole checks if the user has the specified role in the JWT claims.
