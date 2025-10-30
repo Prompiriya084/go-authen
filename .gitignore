@@ -1,2 +1,2 @@
 /.env
-/Infrastructure/Database/db.go
+/Internal/Infrastructure/database/db.go
